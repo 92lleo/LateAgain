@@ -6,21 +6,21 @@ import io.kuenzler.android.lateagain.model.Departure;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * @author Leonhard Künzler
- * @version 0.5
- * @date 15.11.05 16:45
+ * @version 0.6
+ * @date 09.11.05 22:00 cleanup
  */
 public class DateCalculator {
 
     private Departure departure;
 
+    /**
+     *
+     */
     public DateCalculator() {
-        //TODO
-
+        //TODO needed?
     }
 
     /**
@@ -31,9 +31,9 @@ public class DateCalculator {
      * @return time in ms to target
      */
     public long getDateDifference(Date target, Date start) {
-        Log.i("LateAgain", "get diffrence problem:");
-        Log.i("LateAgain", "Target: "+target.toString()+", "+target.getTime());
-        Log.i("LateAgain", "Start: "+start.toString()+", "+start.getTime());
+        Log.i("LateAgain", "get diffrence problem data:");
+        Log.i("LateAgain", "Target: " + target.toString() + ", " + target.getTime());
+        Log.i("LateAgain", "Start: " + start.toString() + ", " + start.getTime());
         return target.getTime() - start.getTime();
     }
 
@@ -63,7 +63,7 @@ public class DateCalculator {
     }
 
     /**
-     * Simple version
+     * Simple version of print date (l, b ,b , b)
      *
      * @param date
      */
@@ -72,14 +72,15 @@ public class DateCalculator {
     }
 
     /**
+     * Gives date back in hh.mm.ss
+     *
      * @param date date as long (ms)
      * @param day  show date
      * @param hour show hours
      * @param min  show minutes
      * @param sec  show seconds
      */
-    public String[] printDate(long date, boolean day, boolean hour, boolean min,
-                          boolean sec) {
+    public String[] printDate(long date, boolean day, boolean hour, boolean min, boolean sec) {
         long[] splitted = splitDate(date);
 
         String time = "";
@@ -102,7 +103,7 @@ public class DateCalculator {
             time += 0;
         }
         time += splitted[3];
-        String[]  result = new String[2];
+        String[] result = new String[2];
         result[0] = time;
         result[1] = departure.getTimeStart() + " (" + departure.getDelay() + ")";
         return result;
@@ -125,31 +126,11 @@ public class DateCalculator {
         cal.setTimeInMillis(System.currentTimeMillis());
         cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splittedTime[0]));
         cal.set(Calendar.MINUTE, Integer.parseInt(splittedTime[1]));
-        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.SECOND, 0); //to direct minute
+        cal.set(Calendar.MILLISECOND, 0); //to direct minute
         int delay = Integer.parseInt(departure.getDelay().substring(1));
         long departureTime = cal.getTimeInMillis() + (delay * 60000);
         Date date = new Date(departureTime);
         return getDateDifferenceFromNow(date);
-    }
-
-    /**
-     * Counts down time in seconds and prints
-     *
-     * @param distance time as long (ms)
-     */
-    public void countDown(final long distance) {
-        final Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            long counterValue = distance;
-
-            public void run() {
-                printDate(counterValue);
-                counterValue -= 1000;
-                if (counterValue <= 0) {
-                    System.out.println(("--alert--"));
-                    timer.cancel();
-                }
-            }
-        }, 0, 1000);
     }
 }

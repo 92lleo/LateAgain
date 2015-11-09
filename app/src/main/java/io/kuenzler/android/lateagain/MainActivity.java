@@ -28,9 +28,13 @@ import io.kuenzler.android.lateagain.control.RequestLoop;
 import io.kuenzler.android.lateagain.model.Departure;
 import io.kuenzler.android.lateagain.view.DialogListView;
 
+/**
+ * @author Leonhard Künzler
+ * @version 0.6
+ * @date 09.11.15 22:00 cleanup + doc
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private final static String TAG = "LateAgain";
     private RequestLoop mReqLoop;
 
     @Override
@@ -44,27 +48,28 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         setDateTimeNow(null);
-        Log.v(TAG, "+ ON RESUME +");
+        Log.v("LateAgain", "+ ON RESUME +");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.v(TAG, "- ON PAUSE -");
+        Log.v("LateAgain", "- ON PAUSE -");
     }
 
     /**
-     * @param time
-     * @param departure
+     * Creates ongoign notification with countdown
+     *
+     * @param time      countdown time HH.mm.ss
+     * @param departure departure time HH.mm
      */
     public void createNotification(String time, String departure) {
-
         if (time.equals("--alert--")) {
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mNotificationManager.cancelAll();
         } else {
-
-            Intent intent = new Intent(this, MainActivity.class);
+            //Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent();
             PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
@@ -72,19 +77,18 @@ public class MainActivity extends AppCompatActivity {
             Notification noti = new Notification.Builder(this)
                     .setContentTitle("Next Departure at " + departure)
                     .setContentText(time + " remaining.")
-                    .setTicker("Countdown started to "+departure)
+                    .setTicker("Countdown started to " + departure)
                     .setNumber(1)
                     .setLargeIcon(bitmap)
-                    //.setSmallIcon(R.drawable.clock)
+                            //.setSmallIcon(R.drawable.clock)
                     .setSmallIcon(R.drawable.train)
                     .setContentIntent(pIntent)
-                    .addAction(0, "<< Prev", pIntent)
-                    .addAction(0, "Stop", pIntent)
-                    .addAction(0, "Next >>", pIntent)
+                            //.addAction(0, "<< Prev", pIntent)
+                            //.addAction(0, "Stop", pIntent)
+                            //.addAction(0, "Next >>", pIntent)
                     .setOngoing(true)
                     .build();
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            // hide the notification after its selected
             noti.flags |= Notification.FLAG_AUTO_CANCEL;
             notificationManager.notify(0, noti);
 
@@ -110,7 +114,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param view
+     * Cancel all notifications and exit
+     *
+     * @param view just to call from click
      */
     public void exit(View view) {
         NotificationManager notifManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -119,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
         System.exit(0);
     }
 
+    /**
+     * Opens Date dialog and sets date
+     *
+     * @param view just to call from click
+     */
     public void openDialogDate(View view) {
         Calendar mcurrentTime = Calendar.getInstance();
         int day = mcurrentTime.get(Calendar.DAY_OF_YEAR);
@@ -136,6 +147,11 @@ public class MainActivity extends AppCompatActivity {
         mDatePicker.show();
     }
 
+    /**
+     * Opens Time dialog and sets time
+     *
+     * @param view just to call from click
+     */
     public void openDialogTime(View view) {
         Calendar mcurrentTime = Calendar.getInstance();
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
@@ -152,17 +168,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Sets actual time
+     *
      * @param view
      */
     public void setDateTimeNow(View view) {
         setDateTime(Calendar.getInstance());
     }
 
+    /**
+     * @param hour
+     * @param minute
+     */
     public void setTime(int hour, int minute) {
         TextView l_time = (TextView) findViewById(R.id.l_time);
         l_time.setText(hour + ":" + minute);
     }
 
+    /**
+     * @param day
+     * @param month
+     * @param year
+     */
     public void setDate(int day, int month, int year) {
         TextView l_date = (TextView) findViewById(R.id.l_date);
         l_date.setText(day + "." + month + "." + year);
@@ -225,12 +252,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startCountdown(int index){
+    /**
+     * @param index
+     */
+    public void startCountdown(int index) {
         mReqLoop.setDepartureIndex(index);
         mReqLoop.start();
     }
 
-    public void stopAll(View view){
+    /**
+     * @param view
+     */
+    public void stopAll(View view) {
         mReqLoop.interrupt();
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();

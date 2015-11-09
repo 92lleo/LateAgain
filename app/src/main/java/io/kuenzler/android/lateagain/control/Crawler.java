@@ -1,5 +1,7 @@
 package io.kuenzler.android.lateagain.control;
 
+import android.util.Log;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,11 +28,10 @@ import io.kuenzler.android.lateagain.model.Departure;
 public class Crawler {
 
     private final String mBahnUrl;
+    private final RequestLoop reqLoop;
     private Document mBahn;
     private String date, time, start, dest;
     private ArrayList<Departure> departures;
-    private RequestLoop reqLoop;
-    //private MainActivity mainView;
 
     /**
      *
@@ -39,22 +40,22 @@ public class Crawler {
         this.reqLoop = reqLoop;
         mBahnUrl = "http://mobile.bahn.de/bin/mobil/query.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&searchMode=NORMAL";
         //setTestData(); // TODO delete when working with gui (getter & setter needed)
-       // sendRequest();
+        // sendRequest();
         //cleanAndParseResults();
-       // if (!departures.isEmpty()) {
-       //     for (Departure d : departures) {
+        // if (!departures.isEmpty()) {
+        //     for (Departure d : departures) {
         //        System.out.println(d);
         //    }
-         //   DateCalculator dc = new DateCalculator(this);
+        //   DateCalculator dc = new DateCalculator(this);
         //    dc.countToDeparture(departures.get(1));
         //}
     }
 
-    public ArrayList<Departure> getDepartures(String date, String time, String start, String dest){
+    public ArrayList<Departure> getDepartures(String date, String time, String start, String dest) {
         setTestData();
         this.start = start;
         this.dest = dest;
-         //TODO
+        //TODO
         sendRequest();
         cleanAndParseResults();
         return departures;
@@ -80,6 +81,7 @@ public class Crawler {
      * Cleans results and parses alternative start and dest locations, sets them
      * when possible
      */
+    //TODO broken / deadlock
     private void cleanAndParseAlternativeLocations() {
         while (mBahn == null) {
             //wait for request
@@ -194,8 +196,7 @@ public class Crawler {
     }
 
     /**
-     * prepare and send request to {@value mBahnUrl} and save output in {@value
-     * mBahn}
+     * prepare and send request to mBahnUrl and save output in mBahn
      */
     private void sendRequest() {
         new Thread() {
@@ -231,14 +232,10 @@ public class Crawler {
                             .data("existOptionBits", "yes")
                             .data("immediateAvail", "ON").data("start", "Suchen")
                             .userAgent("Mozilla").post();
-
                 } catch (UnknownHostException e) {
-                    // mainView.showToast("No internet connection...");
-                } catch (IOException e) {
-                   // mainView.showToast(e.toString());
-                    e.printStackTrace();
-                } catch (NoSuchElementException e) {
-                   // mainView.showToast("Not enough entries");
+                    Log.e("LateAgain", "No connection!!");
+                } catch (IOException | NoSuchElementException e) {
+                    Log.e("LateAgain", "Request failed:\n" + e.toString());
                 }
             }
         }.start();

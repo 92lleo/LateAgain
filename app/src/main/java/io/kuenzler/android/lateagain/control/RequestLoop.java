@@ -10,7 +10,9 @@ import io.kuenzler.android.lateagain.MainActivity;
 import io.kuenzler.android.lateagain.model.Departure;
 
 /**
- *
+ * @author Leonhard Künzler
+ * @version 0.5
+ * @date 09.11.15 22:00 cleanup + doc
  */
 public class RequestLoop extends Thread {
 
@@ -23,7 +25,7 @@ public class RequestLoop extends Thread {
     private int mCurrent;
 
     /**
-     * @param main
+     * @param main MainActivity object
      */
     public RequestLoop(MainActivity main) {
         mMain = main;
@@ -32,10 +34,13 @@ public class RequestLoop extends Thread {
     }
 
     /**
+     * Sets local variables (locations, times) and gets possible departures from Crawler
+     *
      * @param start
      * @param dest
      */
     public ArrayList<Departure> getDepartures(String start, String dest) {
+        // TODO times has to be passed, too (testdata for now)
         mStart = start;
         mDest = dest;
         mCrawler = new Crawler(this);
@@ -49,6 +54,9 @@ public class RequestLoop extends Thread {
         return departures;
     }
 
+    /**
+     * Starts crawler loop and manages countdown
+     */
     public void run() {
         dc = new DateCalculator();
         ArrayList<Departure> departures;
@@ -74,22 +82,32 @@ public class RequestLoop extends Thread {
     }
 
     /**
-     * @param index
+     * Set wanted departure index
+     *
+     * @param index departure index
      */
     public void setDepartureIndex(int index) {
+        //TODO index changes with time :( fix!
         mDepartureIndex = index;
     }
 
+    /**
+     * Counts down to departure and prints time to activity
+     *
+     * @param distance distance to count down to
+     * @param current  current countdown, cancels if != current
+     */
     public void countDown(final long distance, final int current) {
-        Log.i("LateAgain", "Started Timer "+current);
+        Log.i("LateAgain", "Started Timer " + current);
         final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             long counterValue = distance;
             int currentValue = current;
+
             public void run() {
                 if (current != mCurrent) {
                     timer.cancel();
-                    Log.i("LateAgain", "Dropped Timer "+currentValue);
+                    Log.i("LateAgain", "Dropped Timer " + currentValue);
                 }
                 String[] notData = dc.printDate(counterValue);
                 mMain.createNotification(notData[0], notData[1]);
@@ -101,5 +119,4 @@ public class RequestLoop extends Thread {
             }
         }, 0, 1000);
     }
-
 }
