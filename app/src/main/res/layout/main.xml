@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/t_start"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/l_from" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/t_dest"
+        android:layout_below="@+id/t_start"
+        android:layout_alignEnd="@+id/t_start"
+        android:layout_toEndOf="@+id/l_from" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="From"
+        android:id="@+id/l_from"
+        android:layout_above="@+id/t_dest"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="To"
+        android:id="@+id/l_to"
+        android:layout_alignBottom="@+id/t_dest"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:onClick="search"
+        android:id="@+id/b_search"
+        android:layout_below="@+id/l_date"
+        android:layout_toStartOf="@+id/b_exit" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Other Departure"
+        android:id="@+id/b_otherDeparture"
+        android:onClick="showDialog"
+        android:layout_alignTop="@+id/b_exit"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exit"
+        android:onClick="exit"
+        android:id="@+id/b_exit"
+        android:layout_alignTop="@+id/b_search"
+        android:layout_toStartOf="@+id/b_otherDeparture" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="01.01.01"
+        android:id="@+id/l_date"
+        android:layout_below="@+id/t_dest"
+        android:onClick="openDialogDate"
+        android:layout_alignStart="@+id/t_dest" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="01:01"
+        android:id="@+id/l_time"
+        android:onClick="openDialogTime"
+        android:layout_above="@+id/b_otherDeparture"
+        android:layout_toEndOf="@+id/l_divider" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Now"
+        android:onClick="setDateTimeNow"
+        android:id="@+id/b_now"
+        android:layout_below="@+id/t_dest"
+        android:layout_alignEnd="@+id/b_otherDeparture"
+        android:layout_above="@+id/b_otherDeparture"
+        android:layout_toEndOf="@+id/l_time" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text=" - "
+        android:id="@+id/l_divider"
+        android:layout_below="@+id/t_dest"
+        android:layout_toEndOf="@+id/l_date" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop all"
+        android:id="@+id/b_stop"
+        android:onClick="stopAll"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="213dp" />
+
+</RelativeLayout>
