@@ -51,6 +51,14 @@ public class Crawler {
         //}
     }
 
+    /**
+     * 
+     * @param date
+     * @param time
+     * @param start
+     * @param dest
+     * @return
+     */
     public ArrayList<Departure> getDepartures(String date, String time, String start, String dest) {
         setTestData();
         this.start = start;

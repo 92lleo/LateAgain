@@ -24,6 +24,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import io.kuenzler.android.lateagain.control.PropertiesManager;
 import io.kuenzler.android.lateagain.control.RequestLoop;
 import io.kuenzler.android.lateagain.model.Departure;
 import io.kuenzler.android.lateagain.view.DialogListView;
@@ -36,18 +37,25 @@ import io.kuenzler.android.lateagain.view.DialogListView;
 public class MainActivity extends AppCompatActivity {
 
     private RequestLoop mReqLoop;
+    private PropertiesManager mPm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         setDateTimeNow(null);
+        mPm = new PropertiesManager(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         setDateTimeNow(null);
+        EditText startField, destField;
+        startField = (EditText) findViewById(R.id.t_start);
+        destField = (EditText) findViewById(R.id.t_dest);
+        startField.setText(mPm.getFromKey("lastStart"));
+        destField.setText(mPm.getFromKey("lastDestination"));
         Log.v("LateAgain", "+ ON RESUME +");
     }
 
@@ -235,6 +243,9 @@ public class MainActivity extends AppCompatActivity {
         destField = (EditText) findViewById(R.id.t_dest);
         start = startField.getText().toString().trim();
         dest = destField.getText().toString().trim();
+
+        mPm.setFromKey("lastDestination", dest);
+        mPm.setFromKey("lastStart", start);
 
         if (start.isEmpty() || dest.isEmpty()) {
             showToast("miep miep, no emtpy fields!");
