@@ -3,7 +3,7 @@ package io.kuenzler.android.lateagain.control;
 /**
  * @author Leonhard Künzler
  * @version 1.0
- * @date 15.11.03 01:00
+ * @date 03.11.15 01:00
  */
 public class StringSimilarity {
 

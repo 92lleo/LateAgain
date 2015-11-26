@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 
 /**
  * @author Leonhard Künzler
- * @version 0.1
- * @date 25.11.15 23:00
+ * @version 0.2
+ * @date 26.11.15 12:30
  */
 public class PropertiesManager {
 
@@ -14,7 +14,7 @@ public class PropertiesManager {
     Activity main;
 
     /**
-     *
+     * Manages SharedPreferences
      */
     public PropertiesManager(Activity main) {
         this.main = main;
@@ -27,19 +27,27 @@ public class PropertiesManager {
     }
 
     /**
-     * @return
+     * @return the SharedPreferences object
      */
     public SharedPreferences getPrefs() {
         return prefs;
     }
 
+    /**
+     * Returns value from preferences from given key
+     *
+     * @param key key for value
+     * @return value as string
+     */
     public String getFromKey(String key) {
-        return prefs.getString(key, "penis");
+        return prefs.getString(key, "");
     }
 
     /**
-     * @param key
-     * @param value
+     * Sets new value by key
+     *
+     * @param key   key for value
+     * @param value value to set
      */
     public void setFromKey(String key, String value) {
         SharedPreferences.Editor editor = prefs.edit();

@@ -23,7 +23,7 @@ import io.kuenzler.android.lateagain.model.Departure;
 /**
  * @author Leonhard Künzler
  * @version 0.2
- * @date 15.11.03 01:00
+ * @date 03.11.15 01:00
  */
 public class Crawler {
 
@@ -34,7 +34,7 @@ public class Crawler {
     private ArrayList<Departure> departures;
 
     /**
-     *
+     * Creates crawler object with corresponding loop given
      */
     public Crawler(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
@@ -52,7 +52,6 @@ public class Crawler {
     }
 
     /**
-     * 
      * @param date
      * @param time
      * @param start
@@ -215,16 +214,16 @@ public class Crawler {
                             .data("queryPageDisplayed", "yes")
                             .data("REQ0JourneyStopsS0A", "1")
                             .data("REQ0JourneyStopsS0G", start)
-                                    // start
+                            // start
                             .data("REQ0JourneyStopsS0ID", "")
                             .data("locationErrorShownfrom", "yes")
                             .data("REQ0JourneyStopsZ0A", "1")
                             .data("REQ0JourneyStopsZ0G", dest)
-                                    // dest
+                            // dest
                             .data("REQ0JourneyStopsZ0ID", "")
                             .data("locationErrorShownto", "yes")
                             .data("REQ0JourneyDate", date)
-                                    // date
+                            // date
                             .data("REQ0JourneyTime", time)
                             .data("REQ0HafasSearchForw", "1")
                             .data("REQ0Tariff_TravellerType.1", "E")
