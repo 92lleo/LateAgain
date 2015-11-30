@@ -59,10 +59,12 @@ public class Crawler {
      * @return
      */
     public ArrayList<Departure> getDepartures(String date, String time, String start, String dest) {
-        setTestData();
         this.start = start;
         this.dest = dest;
-        //TODO
+        this.date = date;
+        this.time = time;
+        //Todo
+        setTestData();
         sendRequest();
         cleanAndParseResults();
         return departures;
@@ -75,11 +77,15 @@ public class Crawler {
         Date today = new Date();
         DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT,
                 Locale.GERMANY);
-        date = formatter.format(today);
+        if (this.date == null) {
+            date = formatter.format(today);
+        }
         SimpleDateFormat ft = new SimpleDateFormat("HH:mm", Locale.GERMANY);
-        time = ft.format(today);
-        start = "Eching";
-        dest = "Feldmoching";
+        if (this.time == null) {
+            time = ft.format(today);
+        }
+        //TODO start = "Eching";
+        //dest = "Feldmoching";
 
         System.out.println(date + "-" + time + ", " + start + " to " + dest);
     }
@@ -160,8 +166,9 @@ public class Crawler {
             //wait for request
         }
         if (!mBahn.title().contains("Ihre Auskunft")) {
-            mBahn = null;
+            //mBahn = null;
             cleanAndParseAlternativeLocations();
+            mBahn = null;
             sendRequest();
             // throw new NoSuchElementException("No right results to parse");
         }

@@ -82,25 +82,44 @@ public class MainActivity extends AppCompatActivity {
 
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
 
-            Notification noti = new Notification.Builder(this)
-                    .setContentTitle("Next Departure at " + departure)
-                    .setContentText(time + " remaining.")
-                    .setTicker("Countdown started to " + departure)
-                    .setNumber(1)
-                    .setLargeIcon(bitmap)
-                            //.setSmallIcon(R.drawable.clock)
-                    .setSmallIcon(R.drawable.train)
-                    .setContentIntent(pIntent)
-                            //.addAction(0, "<< Prev", pIntent)
-                            //.addAction(0, "Stop", pIntent)
-                            //.addAction(0, "Next >>", pIntent)
-                    .setOngoing(true)
-                    .build();
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            noti.flags |= Notification.FLAG_AUTO_CANCEL;
-            notificationManager.notify(0, noti);
+            if (time.equals("00:00:00")) {
+                Notification noti = new Notification.Builder(this)
+                        .setContentTitle("Departure now!")
+                        .setContentText("00:00:00" + " remaining.")
+                        .setTicker("Train should be there")
+                        .setNumber(1)
+                        .setLargeIcon(bitmap)
+                        //.setSmallIcon(R.drawable.clock)
+                        .setSmallIcon(R.drawable.train)
+                        .setContentIntent(pIntent)
+                        .setOngoing(false)
+                        .build();
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+                notificationManager.notify(0, noti);
 
-            if (time.endsWith("00")) {
+            } else {
+
+                Notification noti = new Notification.Builder(this)
+                        .setContentTitle("Next Departure at " + departure)
+                        .setContentText(time + " remaining.")
+                        .setTicker("Countdown started to " + departure)
+                        .setNumber(1)
+                        .setLargeIcon(bitmap)
+                        //.setSmallIcon(R.drawable.clock)
+                        .setSmallIcon(R.drawable.train)
+                        .setContentIntent(pIntent)
+                        //.addAction(0, "<< Prev", pIntent)
+                        //.addAction(0, "Stop", pIntent)
+                        //.addAction(0, "Next >>", pIntent)
+                        .setOngoing(true)
+                        .build();
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+                notificationManager.notify(0, noti);
+            }
+
+            if (time.endsWith("0:02:00")) {
 
                 final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
                 new Thread() {

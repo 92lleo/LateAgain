@@ -19,7 +19,7 @@ public class RequestLoop extends Thread {
     private Crawler mCrawler;
     private final MainActivity mMain;
     private final int mRefreshRate = 10000; //refresh 10 s
-    private String mStart, mDest;
+    private String mStart, mDest, mTime, mDate;
     private int mDepartureIndex;
     private DateCalculator dc;
     private int mCurrent;
@@ -60,9 +60,17 @@ public class RequestLoop extends Thread {
     public void run() {
         dc = new DateCalculator();
         ArrayList<Departure> departures;
-        Departure departure;
+        Departure departure = null;
         while (!isInterrupted()) {
-            departures = mCrawler.getDepartures(null, null, mStart, mDest);
+            if (departure != null) {
+                mTime = departure.getTimeStart();
+                //TODO calculate time failsafe (23-1:00)
+                mDate = dc.getCurrentDate();
+            } else {
+                mTime = null;
+                mDate = null;
+            }
+            departures = mCrawler.getDepartures(mDate, mTime, mStart, mDest);
             try {
                 departure = departures.get(mDepartureIndex);
             } catch (NullPointerException e) {
@@ -109,8 +117,8 @@ public class RequestLoop extends Thread {
                     timer.cancel();
                     Log.i("LateAgain", "Dropped Timer " + currentValue);
                 }
-                String[] notData = dc.printDate(counterValue);
-                mMain.createNotification(notData[0], notData[1]);
+                String[] notificationData = dc.printDate(counterValue);
+                mMain.createNotification(notificationData[0], notificationData[1]);
                 counterValue -= 1000;
                 if (counterValue <= 0) {
                     timer.cancel();
