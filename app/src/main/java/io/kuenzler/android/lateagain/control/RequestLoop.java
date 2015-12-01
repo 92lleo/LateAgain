@@ -23,6 +23,7 @@ public class RequestLoop extends Thread {
     private int mDepartureIndex;
     private DateCalculator dc;
     private int mCurrent;
+    private ArrayList<String> alternatives;
 
     /**
      * @param main MainActivity object
@@ -46,7 +47,7 @@ public class RequestLoop extends Thread {
         mCrawler = new Crawler(this);
         Log.i("LateAgain", "Start: " + start + ", Dest: " + dest);
         ArrayList<Departure> departures = mCrawler.getDepartures(null, null, mStart, mDest);
-        if (departures.isEmpty()) {
+        if (departures == null || departures.isEmpty()) {
             return null;
         }
         mStart = departures.get(0).getLocStart();
@@ -126,5 +127,20 @@ public class RequestLoop extends Thread {
                 }
             }
         }, 0, 1000);
+    }
+
+
+
+    public void setAlternativeLocation(int whichLoc, String location) {
+        if(whichLoc == 0){
+            mStart = location;
+        } else if (whichLoc == 1){
+            mDest = location;
+        }
+    }
+
+    public void getAlternativeLocations(ArrayList<String> alternativeLocations, int whichLoc) {
+        this.alternatives = alternativeLocations;
+        mMain.getAlternativeLocations(alternativeLocations, whichLoc);
     }
 }

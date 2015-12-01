@@ -27,7 +27,8 @@ import java.util.Calendar;
 import io.kuenzler.android.lateagain.control.PropertiesManager;
 import io.kuenzler.android.lateagain.control.RequestLoop;
 import io.kuenzler.android.lateagain.model.Departure;
-import io.kuenzler.android.lateagain.view.DialogListView;
+import io.kuenzler.android.lateagain.view.DeparturesDLV;
+import io.kuenzler.android.lateagain.view.LocationsDLV;
 
 /**
  * @author Leonhard Künzler
@@ -270,14 +271,20 @@ public class MainActivity extends AppCompatActivity {
             showToast("miep miep, no emtpy fields!");
         } else {
             mReqLoop = new RequestLoop(this);
-            ArrayList<Departure> deps = mReqLoop.getDepartures(start, dest);
+            ArrayList<Departure> deps = null;
+            //while (deps == null) {
+                deps = mReqLoop.getDepartures(start, dest);
+            //}
+            if(deps == null){
+                return;
+            }
             String[] depsString = new String[deps.size()];
             Departure dep;
             for (int i = 0; i < deps.size(); i++) {
                 dep = deps.get(i);
                 depsString[i] = dep.getTimeStart() + " (" + dep.getDelay() + ")";
             }
-            DialogListView dlv = new DialogListView(this, depsString);
+            DeparturesDLV dlv = new DeparturesDLV(this, depsString);
             dlv.showdialog();
         }
     }
@@ -305,6 +312,32 @@ public class MainActivity extends AppCompatActivity {
      */
     public void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * @param whichLoc
+     * @param location
+     */
+    public void setAlternativeLocation(int whichLoc, String location) {
+        EditText field;
+        if (whichLoc == 0) {
+            field = (EditText) findViewById(R.id.t_start);
+            field.setText(location);
+        } else if (whichLoc == 1) {
+            field = (EditText) findViewById(R.id.t_dest);
+            field.setText(location);
+        }
+        mReqLoop.setAlternativeLocation(whichLoc, location);
+    }
+
+    /**
+     * @param locations
+     * @param whichLoc
+     */
+    public void getAlternativeLocations(ArrayList<String> locations, int whichLoc) {
+        String[] locArray = locations.toArray(new String[locations.size()]);
+        LocationsDLV ld = new LocationsDLV(this, locArray, whichLoc);
+        ld.showdialog();
     }
 }
 

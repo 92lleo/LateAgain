@@ -94,8 +94,8 @@ public class Crawler {
      * Cleans results and parses alternative start and dest locations, sets them
      * when possible
      */
-    //TODO broken / deadlock
-    private void cleanAndParseAlternativeLocations() {
+    private boolean cleanAndParseAlternativeLocations() {
+        boolean changed = true;
         while (mBahn == null) {
             //wait for request
         }
@@ -115,7 +115,9 @@ public class Crawler {
             alternativeLocations.add(x.text());
         }
         if (!alternativeLocations.isEmpty()) {
-            start = getBestAlternative(start, alternativeLocations);
+            reqLoop.getAlternativeLocations(alternativeLocations, 0);
+            //TODO start
+            //start = getBestAlternative(start, alternativeLocations);
             System.out.println("Start set to " + start);
         }
 
@@ -130,9 +132,12 @@ public class Crawler {
             alternativeLocations.add(x.text());
         }
         if (!alternativeLocations.isEmpty()) {
-            dest = getBestAlternative(start, alternativeLocations);
+            reqLoop.getAlternativeLocations(alternativeLocations, 1);
+            // TODO dest
+            // dest = getBestAlternative(start, alternativeLocations);
             System.out.println("Dest set to " + dest);
         }
+        return changed;
     }
 
     /**
@@ -142,8 +147,7 @@ public class Crawler {
      * @param alternatives Alternative strings from db site
      * @return best matching string from array
      */
-    private String getBestAlternative(String location,
-                                      ArrayList<String> alternatives) {
+    private String getBestAlternative(String location, ArrayList<String> alternatives) {
         double currentDistance, distance = 0;
         String result = "";
         for (String s : alternatives) {
@@ -167,7 +171,10 @@ public class Crawler {
         }
         if (!mBahn.title().contains("Ihre Auskunft")) {
             //mBahn = null;
-            cleanAndParseAlternativeLocations();
+            if(cleanAndParseAlternativeLocations()){
+                departures = null;//TODO
+                return;
+            }
             mBahn = null;
             sendRequest();
             // throw new NoSuchElementException("No right results to parse");

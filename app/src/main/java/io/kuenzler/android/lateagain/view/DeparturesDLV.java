@@ -17,18 +17,18 @@ import io.kuenzler.android.lateagain.R;
  * @version 0.2
  * @date 15.11.03 01:00
  */
-public class DialogListView implements OnItemClickListener {
+public class DeparturesDLV implements OnItemClickListener {
 
     MainActivity mMain;
     ListView list;
     Dialog listDialog;
-    String[] val = {"sunday", "monday", "tuesday", "thrusday", "friday", "wednesday", "march"};
+    String[] val;
 
     /**
      * @param main
      * @param departures
      */
-    public DialogListView(MainActivity main, String[] departures) {
+    public DeparturesDLV(MainActivity main, String[] departures) {
         mMain = main;
         val = departures;
     }
