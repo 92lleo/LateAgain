@@ -4,8 +4,10 @@ import android.util.Log;
 
 import io.kuenzler.android.lateagain.model.Departure;
 
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * @author Leonhard Künzler
@@ -31,9 +33,6 @@ public class DateCalculator {
      * @return time in ms to target
      */
     public long getDateDifference(Date target, Date start) {
-        Log.i("LateAgain", "get diffrence problem data:");
-        Log.i("LateAgain", "Target: " + target.toString() + ", " + target.getTime());
-        Log.i("LateAgain", "Start: " + start.toString() + ", " + start.getTime());
         return target.getTime() - start.getTime();
     }
 
@@ -132,5 +131,15 @@ public class DateCalculator {
         long departureTime = cal.getTimeInMillis() + (delay * 60000);
         Date date = new Date(departureTime);
         return getDateDifferenceFromNow(date);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getCurrentDate() {
+        Date today = new Date();
+        DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
+        return formatter.format(today);
     }
 }

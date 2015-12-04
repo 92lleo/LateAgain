@@ -19,10 +19,11 @@ public class RequestLoop extends Thread {
     private Crawler mCrawler;
     private final MainActivity mMain;
     private final int mRefreshRate = 10000; //refresh 10 s
-    private String mStart, mDest;
+    private String mStart, mDest, mTime, mDate;
     private int mDepartureIndex;
     private DateCalculator dc;
     private int mCurrent;
+    //private ArrayList<String> alternatives;
 
     /**
      * @param main MainActivity object
@@ -46,7 +47,7 @@ public class RequestLoop extends Thread {
         mCrawler = new Crawler(this);
         Log.i("LateAgain", "Start: " + start + ", Dest: " + dest);
         ArrayList<Departure> departures = mCrawler.getDepartures(null, null, mStart, mDest);
-        if (departures.isEmpty()) {
+        if (departures == null || departures.isEmpty()) {
             return null;
         }
         mStart = departures.get(0).getLocStart();
@@ -60,18 +61,28 @@ public class RequestLoop extends Thread {
     public void run() {
         dc = new DateCalculator();
         ArrayList<Departure> departures;
-        Departure departure;
+        Departure departure = null;
         while (!isInterrupted()) {
-            departures = mCrawler.getDepartures(null, null, mStart, mDest);
+            if (departure != null) {
+                mTime = departure.getTimeStart();
+                //TODO calculate time failsafe (23-1:00)
+                mDate = dc.getCurrentDate();
+            } else {
+                mTime = null;
+                mDate = null;
+            }
+            departures = mCrawler.getDepartures(mDate, mTime, mStart, mDest);
+            String type;
             try {
                 departure = departures.get(mDepartureIndex);
+                type = departure.getType();
             } catch (NullPointerException e) {
                 Log.e("LateAgain", "Expected departure " + mDepartureIndex + " not there.", e);
                 return;
             }
             mCurrent++;
             long distance = dc.countToDeparture(departure);
-            countDown(distance, mCurrent);
+            countDown(distance, mCurrent, type);
             try {
                 sleep(mRefreshRate);
             } catch (InterruptedException e) {
@@ -97,7 +108,7 @@ public class RequestLoop extends Thread {
      * @param distance distance to count down to
      * @param current  current countdown, cancels if != current
      */
-    public void countDown(final long distance, final int current) {
+    public void countDown(final long distance, final int current, final String type) {
         Log.i("LateAgain", "Started Timer " + current);
         final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -109,8 +120,8 @@ public class RequestLoop extends Thread {
                     timer.cancel();
                     Log.i("LateAgain", "Dropped Timer " + currentValue);
                 }
-                String[] notData = dc.printDate(counterValue);
-                mMain.createNotification(notData[0], notData[1]);
+                String[] notificationData = dc.printDate(counterValue);
+                mMain.createNotification(notificationData[0], notificationData[1], type);
                 counterValue -= 1000;
                 if (counterValue <= 0) {
                     timer.cancel();
@@ -118,5 +129,36 @@ public class RequestLoop extends Thread {
                 }
             }
         }, 0, 1000);
+    }
+
+    private boolean hasDelayChanged(){
+        //TODO int or departure?
+        return false;
+    }
+
+    /**
+     *
+     * @param whichLoc
+     * @param location
+     */
+    public void setAlternativeLocation(int whichLoc, String location) {
+        if(whichLoc == 0){
+            mStart = location;
+        } else if (whichLoc == 1){
+            mDest = location;
+        }
+    }
+
+    /**
+     *
+     * @param alternativeLocations
+     * @param whichLoc
+     */
+    public void getAlternativeLocations(ArrayList<String> alternativeLocations, int whichLoc) {
+        mMain.getAlternativeLocations(alternativeLocations, whichLoc);
+    }
+
+    public void setCorrectedLocations(String start, String dest) {
+        mMain.setCorrectedLocations(start, dest);
     }
 }
