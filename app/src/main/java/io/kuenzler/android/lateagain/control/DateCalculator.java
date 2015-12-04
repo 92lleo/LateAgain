@@ -33,9 +33,6 @@ public class DateCalculator {
      * @return time in ms to target
      */
     public long getDateDifference(Date target, Date start) {
-        Log.i("LateAgain", "get diffrence problem data:");
-        Log.i("LateAgain", "Target: " + target.toString() + ", " + target.getTime());
-        Log.i("LateAgain", "Start: " + start.toString() + ", " + start.getTime());
         return target.getTime() - start.getTime();
     }
 

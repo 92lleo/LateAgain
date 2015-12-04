@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
-import io.kuenzler.android.lateagain.MainActivity;
 import io.kuenzler.android.lateagain.model.Departure;
 
 /**
@@ -25,7 +24,7 @@ import io.kuenzler.android.lateagain.model.Departure;
  * @version 0.2
  * @date 03.11.15 01:00
  */
-public class Crawler {
+public class Crawler2 {
 
     private final String mBahnUrl;
     private final RequestLoop reqLoop;
@@ -36,11 +35,11 @@ public class Crawler {
     /**
      * Creates crawler object with corresponding loop given
      */
-    public Crawler(RequestLoop reqLoop) {
+    public Crawler2(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
         mBahnUrl = "http://mobile.bahn.de/bin/mobil/query.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&searchMode=NORMAL";
         //setTestData(); // TODO delete when working with gui (getter & setter needed)
-        // sendRequest();
+        //sendRequest();
         //cleanAndParseResults();
         // if (!departures.isEmpty()) {
         //     for (Departure d : departures) {

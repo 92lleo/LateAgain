@@ -23,7 +23,7 @@ public class RequestLoop extends Thread {
     private int mDepartureIndex;
     private DateCalculator dc;
     private int mCurrent;
-    private ArrayList<String> alternatives;
+    //private ArrayList<String> alternatives;
 
     /**
      * @param main MainActivity object
@@ -72,15 +72,17 @@ public class RequestLoop extends Thread {
                 mDate = null;
             }
             departures = mCrawler.getDepartures(mDate, mTime, mStart, mDest);
+            String type;
             try {
                 departure = departures.get(mDepartureIndex);
+                type = departure.getType();
             } catch (NullPointerException e) {
                 Log.e("LateAgain", "Expected departure " + mDepartureIndex + " not there.", e);
                 return;
             }
             mCurrent++;
             long distance = dc.countToDeparture(departure);
-            countDown(distance, mCurrent);
+            countDown(distance, mCurrent, type);
             try {
                 sleep(mRefreshRate);
             } catch (InterruptedException e) {
@@ -106,7 +108,7 @@ public class RequestLoop extends Thread {
      * @param distance distance to count down to
      * @param current  current countdown, cancels if != current
      */
-    public void countDown(final long distance, final int current) {
+    public void countDown(final long distance, final int current, final String type) {
         Log.i("LateAgain", "Started Timer " + current);
         final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -119,7 +121,7 @@ public class RequestLoop extends Thread {
                     Log.i("LateAgain", "Dropped Timer " + currentValue);
                 }
                 String[] notificationData = dc.printDate(counterValue);
-                mMain.createNotification(notificationData[0], notificationData[1]);
+                mMain.createNotification(notificationData[0], notificationData[1], type);
                 counterValue -= 1000;
                 if (counterValue <= 0) {
                     timer.cancel();
@@ -129,8 +131,16 @@ public class RequestLoop extends Thread {
         }, 0, 1000);
     }
 
+    private boolean hasDelayChanged(){
+        //TODO int or departure?
+        return false;
+    }
 
-
+    /**
+     *
+     * @param whichLoc
+     * @param location
+     */
     public void setAlternativeLocation(int whichLoc, String location) {
         if(whichLoc == 0){
             mStart = location;
@@ -139,8 +149,16 @@ public class RequestLoop extends Thread {
         }
     }
 
+    /**
+     *
+     * @param alternativeLocations
+     * @param whichLoc
+     */
     public void getAlternativeLocations(ArrayList<String> alternativeLocations, int whichLoc) {
-        this.alternatives = alternativeLocations;
         mMain.getAlternativeLocations(alternativeLocations, whichLoc);
+    }
+
+    public void setCorrectedLocations(String start, String dest) {
+        mMain.setCorrectedLocations(start, dest);
     }
 }
