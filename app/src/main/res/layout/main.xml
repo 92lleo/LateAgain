@@ -47,8 +47,8 @@
         android:text="Search"
         android:onClick="search"
         android:id="@+id/b_search"
-        android:layout_below="@+id/l_date"
-        android:layout_toStartOf="@+id/b_exit" />
+        android:layout_alignTop="@+id/b_stop"
+        android:layout_alignParentStart="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -57,8 +57,8 @@
         android:text="Clear Fields"
         android:id="@+id/b_otherDeparture"
         android:onClick="clearFields"
-        android:layout_alignTop="@+id/b_exit"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignTop="@+id/b_stop"
+        android:layout_alignEnd="@+id/t_time" />
 
     <Button
         android:layout_width="wrap_content"
@@ -66,59 +66,8 @@
         android:text="Exit"
         android:onClick="exit"
         android:id="@+id/b_exit"
-        android:layout_alignTop="@+id/b_search"
-        android:layout_toStartOf="@+id/b_otherDeparture" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="01.01.01"
-        android:id="@+id/l_date"
-        android:layout_below="@+id/t_dest"
-        android:onClick="openDialogDate"
-        android:layout_alignStart="@+id/t_dest" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="01:01"
-        android:id="@+id/l_time"
-        android:onClick="openDialogTime"
-        android:layout_above="@+id/b_otherDeparture"
-        android:layout_toEndOf="@+id/l_divider" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Now"
-        android:onClick="setDateTimeNow"
-        android:id="@+id/b_now"
-        android:layout_below="@+id/t_dest"
-        android:layout_alignEnd="@+id/b_otherDeparture"
-        android:layout_above="@+id/b_otherDeparture"
-        android:layout_toEndOf="@+id/l_time" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text=" - "
-        android:id="@+id/l_divider"
-        android:layout_below="@+id/t_dest"
-        android:layout_toEndOf="@+id/l_date" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Stop all Notifications"
-        android:id="@+id/b_stop"
-        android:onClick="stopAll"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="213dp" />
+        android:layout_below="@+id/b_search"
+        android:layout_toStartOf="@+id/b_stop" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -126,8 +75,35 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="To kill non responding notifications, press exit"
         android:id="@+id/textView"
-        android:layout_alignStart="@+id/b_search"
-        android:layout_below="@+id/b_stop"
-        android:layout_alignEnd="@+id/b_stop" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/t_date"
+        android:layout_below="@+id/t_dest"
+        android:text="Date" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="time"
+        android:ems="10"
+        android:id="@+id/t_time"
+        android:layout_below="@+id/t_dest"
+        android:layout_toEndOf="@+id/t_date"
+        android:text="Time" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:onClick="stopAll"
+        android:id="@+id/b_stop"
+        android:layout_below="@+id/t_date"
+        android:layout_toEndOf="@+id/b_search" />
 
 </RelativeLayout>

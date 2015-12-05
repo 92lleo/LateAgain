@@ -12,14 +12,12 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
+//import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -37,65 +35,58 @@ import io.kuenzler.android.lateagain.view.LocationsDLV;
 
 /**
  * @author Leonhard Künzler
- * @version 0.6
- * @date 09.11.15 22:00 cleanup + doc
+ * @version 0.7
  */
 public class MainActivity extends AppCompatActivity {
+
+    private AutoCompleteTextView mStartView;
+    private AutoCompleteTextView mDestView;
+    private TextView mDateView;
+    //private final TextView mTimeView = (TextView) findViewById(R.id.l_time);
+    //private final Button mNowButton = (Button) findViewById(R.id.b_now);
 
     private RequestLoop mReqLoop;
     private PropertiesManager mPm;
     private String[] mOldLocations;
-
-    //private AutoCompleteTextView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        mStartView = (AutoCompleteTextView) findViewById(R.id.t_start);
+        mDestView = (AutoCompleteTextView) findViewById(R.id.t_dest);
+        mDateView = (TextView) findViewById(R.id.t_date);
+
         setDateTimeNow(null);
         mPm = new PropertiesManager(this);
-        //mPm.setFromKey("locationHistory", "Eching,Feldmoching,Westkreuz");
         mOldLocations = mPm.getFromKey("locationHistory").split(";");
-        final AutoCompleteTextView startView = (AutoCompleteTextView) findViewById(R.id.t_start);
-        final AutoCompleteTextView destView = (AutoCompleteTextView) findViewById(R.id.t_dest);
         updateDropdown();
-        startView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        initLocationView(mStartView);
+        initLocationView(mDestView);
+    }
+
+    /**
+     * @param actv AutoCompliteTextView to init
+     */
+    private void initLocationView(final AutoCompleteTextView actv) {
+        actv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     updateDropdown();
-                    startView.showDropDown();
+                    actv.showDropDown();
                 }
             }
         });
-        destView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    updateDropdown();
-                    destView.showDropDown();
-                }
-            }
-        });
-        startView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                   search(null);
-                }
-                return true;
-            }
-        });
-        destView.setOnKeyListener(new View.OnKeyListener() {
+        actv.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     search(null);
                 }
-                return false;
+                return true;
             }
         });
     }
@@ -104,29 +95,15 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         setDateTimeNow(null);
-        EditText startField, destField;
-        startField = (EditText) findViewById(R.id.t_start);
-        destField = (EditText) findViewById(R.id.t_dest);
-        startField.setText(mPm.getFromKey("lastStart"));
-        destField.setText(mPm.getFromKey("lastDestination"));
-        Log.v("LateAgain", "+ ON RESUME +");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.v("LateAgain", "- ON PAUSE -");
     }
 
     /**
-     *
+     * Updates dropdown dialogs with current oldLocations
      */
     private void updateDropdown() {
-        final AutoCompleteTextView startView = (AutoCompleteTextView) findViewById(R.id.t_start);
-        final AutoCompleteTextView destView = (AutoCompleteTextView) findViewById(R.id.t_dest);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(mOldLocations));
-        startView.setAdapter(adapter);
-        destView.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(mOldLocations));
+        mStartView.setAdapter(adapter);
+        mDestView.setAdapter(adapter);
     }
 
     /**
@@ -134,76 +111,71 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param time      countdown time HH.mm.ss
      * @param departure departure time HH.mm
-     * @param type
+     * @param type      transportation type (s,bus,u)
      */
     public void createNotification(String time, String departure, String type) {
-        if (time.equals("--alert--")) {
-            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationManager.cancelAll();
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
+
+        if (time.equals("00:00:00")) {
+            Notification noti = new Notification.Builder(this)
+                    .setContentTitle("Departure now!")
+                    .setContentText("00:00:00" + " remaining.")
+                    .setTicker("Train should be there")
+                    .setNumber(1)
+                    .setLargeIcon(bitmap)
+                    //.setSmallIcon(R.drawable.clock)
+                    .setSmallIcon(R.drawable.train)
+                    .setContentIntent(pIntent)
+                    .setOngoing(false)
+                    .build();
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            noti.flags |= Notification.FLAG_AUTO_CANCEL;
+            notificationManager.notify(0, noti);
+
         } else {
-            //Intent intent = new Intent(this, MainActivity.class);
-            Intent intent = new Intent();
-            PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
+            Notification noti = new Notification.Builder(this)
+                    .setContentTitle("Next Departure at " + departure + " (" + type + ")")
+                    .setContentText(time + " remaining.")
+                    .setTicker("Countdown started to " + departure)
+                    .setNumber(1)
+                    .setLargeIcon(bitmap)
+                    //.setSmallIcon(R.drawable.clock)
+                    .setSmallIcon(R.drawable.train)
+                    .setContentIntent(pIntent)
+                    //.addAction(0, "<< Prev", pIntent)
+                    //.addAction(0, "Stop", pIntent)
+                    //.addAction(0, "Next >>", pIntent)
+                    .setOngoing(true)
+                    .build();
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            noti.flags |= Notification.FLAG_AUTO_CANCEL;
+            notificationManager.notify(0, noti);
+        }
 
-            if (time.equals("00:00:00")) {
-                Notification noti = new Notification.Builder(this)
-                        .setContentTitle("Departure now!")
-                        .setContentText("00:00:00" + " remaining.")
-                        .setTicker("Train should be there")
-                        .setNumber(1)
-                        .setLargeIcon(bitmap)
-                        //.setSmallIcon(R.drawable.clock)
-                        .setSmallIcon(R.drawable.train)
-                        .setContentIntent(pIntent)
-                        .setOngoing(false)
-                        .build();
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                noti.flags |= Notification.FLAG_AUTO_CANCEL;
-                notificationManager.notify(0, noti);
+        if (time.endsWith("0:02:00")) {
 
-            } else {
+            final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            new Thread() {
 
-                Notification noti = new Notification.Builder(this)
-                        .setContentTitle("Next Departure at " + departure + " (" + type + ")")
-                        .setContentText(time + " remaining.")
-                        .setTicker("Countdown started to " + departure)
-                        .setNumber(1)
-                        .setLargeIcon(bitmap)
-                        //.setSmallIcon(R.drawable.clock)
-                        .setSmallIcon(R.drawable.train)
-                        .setContentIntent(pIntent)
-                        //.addAction(0, "<< Prev", pIntent)
-                        //.addAction(0, "Stop", pIntent)
-                        //.addAction(0, "Next >>", pIntent)
-                        .setOngoing(true)
-                        .build();
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                noti.flags |= Notification.FLAG_AUTO_CANCEL;
-                notificationManager.notify(0, noti);
-            }
-
-            if (time.endsWith("0:02:00")) {
-
-                final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-                new Thread() {
-
-                    public void run() {
-                        try {
-                            v.vibrate(200);
-                            sleep(300);
-                            v.vibrate(200);
-                            sleep(300);
-                            v.vibrate(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                public void run() {
+                    try {
+                        v.vibrate(200);
+                        sleep(300);
+                        v.vibrate(200);
+                        sleep(300);
+                        v.vibrate(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                }.start();
-            }
+                }
+            }.start();
         }
     }
+
 
     /**
      * Cancel all notifications and exit
@@ -262,43 +234,44 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Sets actual time
      *
-     * @param view
+     * @param view action view
      */
     public void setDateTimeNow(View view) {
         setDateTime(Calendar.getInstance());
     }
 
     /**
-     * @param hour
-     * @param minute
+     * @param hour   hour as int
+     * @param minute minute as int
      */
     public void setTime(int hour, int minute) {
-        TextView l_time = (TextView) findViewById(R.id.l_time);
-        l_time.setText(hour + ":" + minute);
+        String fullTime = hour + ":" + minute;
+        //TODOt_time.setText(fullTime);
     }
 
     /**
-     * @param day
-     * @param month
-     * @param year
+     * @param day   day as int
+     * @param month month as int
+     * @param year  year as int
+     *              //TODO use calendar or date
      */
     public void setDate(int day, int month, int year) {
-        TextView l_date = (TextView) findViewById(R.id.l_date);
-        l_date.setText(day + "." + month + "." + year);
+        String fullDate = day + "." + month + "." + year;
+        mDateView.setText(fullDate);
     }
 
     /**
-     * @param cal
+     * @param cal calendar with date to set
      */
     public void setDateTime(Calendar cal) {
         int hour, minute, day, month, year;
-        String date, time;
-        Calendar calendar;
-        TextView l_date = (TextView) findViewById(R.id.l_date);
-        TextView l_time = (TextView) findViewById(R.id.l_time);
-        Button b_now = (Button) findViewById(R.id.b_now);
 
-        calendar = Calendar.getInstance();
+        Calendar calendar;
+        if (cal != null) {
+            calendar = cal;
+        } else {
+            calendar = Calendar.getInstance();
+        }
         hour = calendar.get(Calendar.HOUR_OF_DAY);
         minute = calendar.get(Calendar.MINUTE);
 
@@ -311,27 +284,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param view
+     * @param view view called the action
      */
     public void search(View view) {
-        EditText startField, destField;
         String start, dest;
-        startField = (EditText) findViewById(R.id.t_start);
-        destField = (EditText) findViewById(R.id.t_dest);
-        start = startField.getText().toString().trim();
-        dest = destField.getText().toString().trim();
+        start = mStartView.getText().toString().trim();
+        dest = mDestView.getText().toString().trim();
 
         mPm.setFromKey("lastDestination", dest);
         mPm.setFromKey("lastStart", start);
 
         if (start.isEmpty() || dest.isEmpty()) {
-            showToast("miep miep, no emtpy fields!");
+            showToast("No emtpy fields!");
+        } else if (start.equalsIgnoreCase(dest)) {
+            showToast("No equal locations");
         } else {
             mReqLoop = new RequestLoop(this);
-            ArrayList<Departure> deps = null;
-            //while (deps == null) {
+            ArrayList<Departure> deps;
             deps = mReqLoop.getDepartures(start, dest);
-            //}
             if (deps == null) {
                 return;
             }
@@ -347,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param index
+     * @param index index of desired departure
      */
     public void startCountdown(int index) {
         mReqLoop.setDepartureIndex(index);
@@ -355,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param view
+     * @param view view that called the action
      */
     public void stopAll(View view) {
         mReqLoop.interrupt();
@@ -365,15 +335,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param message
+     * @param message message to toast
      */
     public void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * @param whichLoc
-     * @param location
+     * @param whichLoc 0=start,1=dest
+     * @param location Location as String
      */
     public void setAlternativeLocation(int whichLoc, String location) {
         EditText field;
@@ -389,8 +359,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param locations
-     * @param whichLoc
+     * @param locations List of alternative locations for dialog
+     * @param whichLoc  0=start,1=dest
      */
     public void getAlternativeLocations(ArrayList<String> locations, int whichLoc) {
         String[] locArray = locations.toArray(new String[locations.size()]);
@@ -398,17 +368,19 @@ public class MainActivity extends AppCompatActivity {
         ld.showdialog();
     }
 
+    /**
+     * Clears Location selection textfields
+     *
+     * @param view view that called the action
+     */
     public void clearFields(View view) {
-        EditText startField, destField;
-        startField = (EditText) findViewById(R.id.t_start);
-        destField = (EditText) findViewById(R.id.t_dest);
-        startField.setText("");
-        destField.setText("");
+        mStartView.setText("");
+        mDestView.setText("");
     }
 
     /**
-     * @param start
-     * @param dest
+     * @param start Start location
+     * @param dest  Dest location
      */
     public void setCorrectedLocations(String start, String dest) {
         EditText startField, destField;
@@ -426,9 +398,7 @@ public class MainActivity extends AppCompatActivity {
         oldLocationsParsed = removeDuplicates(oldLocationsParsed);
         oldLocations = start.trim() + ";" + dest.trim();
         for (String loc : oldLocationsParsed) {
-            if (loc.equalsIgnoreCase(start) || loc.equalsIgnoreCase(dest)) {
-                //
-            } else {
+            if (!loc.equalsIgnoreCase(start) || !loc.equalsIgnoreCase(dest)) {
                 oldLocations += ";" + loc.trim();
             }
         }
@@ -439,18 +409,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param arr
-     * @return
+     * @param arr String array with duplicates
+     * @return String array without duplicates
      */
     public String[] removeDuplicates(String[] arr) {
-        ArrayList<String> arrClean = new ArrayList<String>();
+        ArrayList<String> arrClean = new ArrayList<>();
         for (String s : arr) {
             s = s.trim();
-            if (!arrClean.contains(s))
+            if (!arrClean.contains(s)) {
                 arrClean.add(s);
+            }
         }
-        String[] result = arrClean.toArray(new String[arrClean.size()]);
-        return result;
+        return arrClean.toArray(new String[arrClean.size()]);
     }
 }
 

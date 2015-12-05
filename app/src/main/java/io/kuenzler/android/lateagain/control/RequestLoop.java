@@ -62,15 +62,17 @@ public class RequestLoop extends Thread {
         dc = new DateCalculator();
         ArrayList<Departure> departures;
         Departure departure = null;
+        boolean firstRound = true;
         while (!isInterrupted()) {
-            if (departure != null) {
+            if (departure != null && mTime == null) {
                 mTime = departure.getTimeStart();
                 //TODO calculate time failsafe (23-1:00)
                 mDate = dc.getCurrentDate();
-            } else {
+            } else if (firstRound) {
                 mTime = null;
                 mDate = null;
             }
+
             departures = mCrawler.getDepartures(mDate, mTime, mStart, mDest);
             String type;
             try {
@@ -80,6 +82,19 @@ public class RequestLoop extends Thread {
                 Log.e("LateAgain", "Expected departure " + mDepartureIndex + " not there.", e);
                 return;
             }
+
+            Log.i("LateAgainX", "Old: " + mTime + " , new: " + departure.getTimeStart());
+            if (!firstRound && !mTime.equals(departure.getTimeStart())) {
+                //TODO time problem goes here
+                int oldIndex = mDepartureIndex;
+                if (mDepartureIndex > 0) {
+                    mDepartureIndex--;
+                }
+                Log.i("LateAgainX", "decreased index from " + oldIndex + " to " + mDepartureIndex);
+                //skip contdown stuff until right one is found
+                continue;
+            }
+            firstRound = false;
             mCurrent++;
             long distance = dc.countToDeparture(departure);
             countDown(distance, mCurrent, type);
@@ -90,6 +105,7 @@ public class RequestLoop extends Thread {
                 interrupt();
             }
         }
+
     }
 
     /**
@@ -131,26 +147,24 @@ public class RequestLoop extends Thread {
         }, 0, 1000);
     }
 
-    private boolean hasDelayChanged(){
+    private boolean hasDelayChanged() {
         //TODO int or departure?
         return false;
     }
 
     /**
-     *
      * @param whichLoc
      * @param location
      */
     public void setAlternativeLocation(int whichLoc, String location) {
-        if(whichLoc == 0){
+        if (whichLoc == 0) {
             mStart = location;
-        } else if (whichLoc == 1){
+        } else if (whichLoc == 1) {
             mDest = location;
         }
     }
 
     /**
-     *
      * @param alternativeLocations
      * @param whichLoc
      */
