@@ -37,7 +37,8 @@ public class Crawler2 {
      */
     public Crawler2(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
-        mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&";
+        //mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&";
+        mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?ld=15061&rt=1&use_realtime_filter=1&webview=&";
         //setTestData(); // TODO delete when working with gui (getter & setter needed)
         //sendRequest();
         //cleanAndParseResults();
@@ -180,13 +181,24 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
+        Log.i("wtf", mBahn.title());
         Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
         String info = information.first().text();
-        start = info.substring(0, info.indexOf(" - ")).trim();
+        try {
+            start = info.substring(0, info.indexOf(" - ")).trim();
+        } catch (Exception e) {
+            start = info;
+            Log.e("LateAgain", info);
+        }
         Log.i("LateAgainStart", start);
         reqLoop.setCorrectedLocations(start, dest);
-
-        Elements departureList = mBahn.select("div[class=clicktable").get(0).children();
+        Elements departureList;
+        try {
+            departureList = mBahn.select("div[class=clicktable").get(0).children();
+        } catch (IndexOutOfBoundsException e){
+            Log.e("LateAgain", "No departures with that line");
+            return;
+        }
 
         departures = new ArrayList<>();
         for (Element departureTable : departureList) {
@@ -202,7 +214,7 @@ public class Crawler2 {
             String ownText = departureTable.ownText();
             String platform, target;
             if (ownText.contains("Gl. ")) {
-                target = ownText.substring(2, ownText.length() - 8).trim();
+                target = ownText.substring(2, (ownText.indexOf("Gl.")-1)).trim();
                 platform = ownText.substring(ownText.indexOf("Gl."));
             } else {
                 target = ownText.substring(2, ownText.length() - 5).trim();
@@ -265,6 +277,8 @@ public class Crawler2 {
                     Log.e("LateAgain", "No connection!!");
                 } catch (IOException | NoSuchElementException e) {
                     Log.e("LateAgain", "Request failed:\n" + e.toString());
+                } catch (IllegalArgumentException e){
+                    Log.e("LateAgain", "Request failed: Nullvalue in post");
                 }
             }
         }.start();

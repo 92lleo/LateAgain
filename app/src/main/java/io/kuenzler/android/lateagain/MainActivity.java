@@ -63,7 +63,11 @@ public class MainActivity extends AppCompatActivity {
         mOldLocations = mPm.getFromKey("locationHistory").split(";");
         updateDropdown();
         initLocationView(mStartView);
-        //initLocationView(mDestView);
+        initLocationView(mDestView);
+
+        String[] lines = {"Bus", "Str", "U", "S"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(lines));
+        mDestView.setAdapter(adapter);
     }
 
     /**
@@ -103,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
     private void updateDropdown() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(mOldLocations));
         mStartView.setAdapter(adapter);
-        mDestView.setAdapter(adapter);
     }
 
     /**
@@ -113,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
      * @param departure departure time HH.mm
      * @param type      transportation type (s,bus,u)
      */
-    public void createNotification(String time, String departure, String type) {
+    public void createNotification(String time, String departure, String type, String platform) {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
@@ -122,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         if (time.equals("00:00:00")) {
             Notification noti = new Notification.Builder(this)
                     .setContentTitle("Departure now!")
-                    .setContentText("00:00:00" + " remaining.")
+                    .setContentText("00:00:00" + " remaining. (Platrform +"+platform+")")
                     .setTicker("Train should be there")
                     .setNumber(1)
                     .setLargeIcon(bitmap)
@@ -139,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
             Notification noti = new Notification.Builder(this)
                     .setContentTitle("Next Departure at " + departure + " (" + type + ")")
-                    .setContentText(time + " remaining.")
+                    .setContentText(time + " remaining. (Platform "+platform+")")
                     .setTicker("Countdown started to " + departure)
                     .setNumber(1)
                     .setLargeIcon(bitmap)
@@ -287,21 +290,23 @@ public class MainActivity extends AppCompatActivity {
      * @param view view called the action
      */
     public void search(View view) {
+        stopAll(view);
         String start, dest;
         start = mStartView.getText().toString().trim();
-        //dest = mDestView.getText().toString().trim();
+        dest = mDestView.getText().toString().trim();
 
         //mPm.setFromKey("lastLine", dest);
         mPm.setFromKey("lastStart", start);
 
         if (start.isEmpty()) {
             showToast("Start must not be empty!");
-        //} else if (start.equalsIgnoreCase(dest)) {
-        //    showToast("No equal locations");
+            //} else if (start.equalsIgnoreCase(dest)) {
+            //    showToast("No equal locations");
         } else {
+            checkLine(dest);
             mReqLoop = new RequestLoop(this);
             ArrayList<Departure> deps;
-            deps = mReqLoop.getDepartures(start, ""); //Dest empty for now
+            deps = mReqLoop.getDepartures(start, dest); //Dest empty for now
             if (deps == null) {
                 return;
             }
@@ -313,6 +318,48 @@ public class MainActivity extends AppCompatActivity {
             }
             DeparturesDLV dlv = new DeparturesDLV(this, depsString);
             dlv.showdialog();
+        }
+    }
+
+    private void checkLine(String unfixedLine) {
+        String line = unfixedLine.toLowerCase().trim();
+        boolean recognized = false;
+        if (line.isEmpty()) {
+            recognized = true;
+        }
+        if (line.contains("bus")) {
+            recognized = true;
+        }
+        if (line.contains("bu")) {
+            recognized = true;
+        }
+        if (line.contains("b")) {
+            recognized = true;
+        }
+        if (line.contains("str")) {
+            recognized = true;
+        }
+        if (line.contains("st")) {
+            recognized = true;
+        }
+        if (line.contains("s")) {
+            recognized = true;
+        }
+        if (line.contains("u")) {
+            recognized = true;
+        }
+        if (line.contains("v")) {
+            recognized = true;
+        }
+        try {
+            Integer.parseInt(line);
+            recognized = true;
+        } catch (NumberFormatException e) {
+            // not an integer!
+        }
+
+        if (!recognized) {
+            showToast("Your Line is not recognized. Try something like: S, S1, 1 , bus, bu, 650, str, u");
         }
     }
 
@@ -328,11 +375,12 @@ public class MainActivity extends AppCompatActivity {
      * @param view view that called the action
      */
     public void stopAll(View view) {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
         if (mReqLoop == null || !mReqLoop.isAlive()) {
             return;
         }
         mReqLoop.interrupt();
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
         //TODO race condition
     }
@@ -391,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
         destField = (EditText) findViewById(R.id.t_line);
         try {
             startField.setText(start);
-            destField.setText(dest);
+            //destField.setText(dest);
         } catch (Exception e) {
             //TODO happens when started in loop thread
             Log.e("Wrong thread ex", "see todo");
@@ -399,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
         String oldLocations = mPm.getFromKey("locationHistory");
         String[] oldLocationsParsed = oldLocations.split(",");
         oldLocationsParsed = removeDuplicates(oldLocationsParsed);
-        oldLocations = start.trim() + ";" + dest.trim();
+        oldLocations = start.trim();
         for (String loc : oldLocationsParsed) {
             if (!loc.equalsIgnoreCase(start) || !loc.equalsIgnoreCase(dest)) {
                 oldLocations += ";" + loc.trim();

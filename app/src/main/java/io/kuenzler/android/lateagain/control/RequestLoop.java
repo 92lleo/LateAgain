@@ -74,10 +74,11 @@ public class RequestLoop extends Thread {
             }
 
             departures = mCrawler.getDepartures(mDate, mTime, mStart, mDest);
-            String type;
+            String type, platform;
             try {
                 departure = departures.get(mDepartureIndex);
                 type = departure.getType();
+                platform = departure.getPlatform();
             } catch (NullPointerException e) {
                 Log.e("LateAgain", "Expected departure " + mDepartureIndex + " not there.", e);
                 return;
@@ -97,7 +98,7 @@ public class RequestLoop extends Thread {
             firstRound = false;
             mCurrent++;
             long distance = dc.countToDeparture(departure);
-            countDown(distance, mCurrent, type);
+            countDown(distance, mCurrent, type, platform);
             try {
                 sleep(mRefreshRate);
             } catch (InterruptedException e) {
@@ -124,7 +125,7 @@ public class RequestLoop extends Thread {
      * @param distance distance to count down to
      * @param current  current countdown, cancels if != current
      */
-    public void countDown(final long distance, final int current, final String type) {
+    public void countDown(final long distance, final int current, final String type, final String platform) {
         Log.i("LateAgain", "Started Timer " + current);
         final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -137,7 +138,7 @@ public class RequestLoop extends Thread {
                     Log.i("LateAgain", "Dropped Timer " + currentValue);
                 }
                 String[] notificationData = dc.printDate(counterValue);
-                mMain.createNotification(notificationData[0], notificationData[1], type);
+                mMain.createNotification(notificationData[0], notificationData[1], type, platform);
                 counterValue -= 1000;
                 if (counterValue <= 0) {
                     timer.cancel();
