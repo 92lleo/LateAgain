@@ -21,7 +21,6 @@
         </activity>
         <activity
             android:name=".NotificationResponseAcitivity"
-            android:label="@string/title_activity_notification_response_acitivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>

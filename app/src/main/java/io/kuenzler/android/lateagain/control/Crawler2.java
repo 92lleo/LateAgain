@@ -37,7 +37,7 @@ public class Crawler2 {
      */
     public Crawler2(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
-        mBahnUrl = "http://mobile.bahn.de/bin/mobil/query.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&searchMode=NORMAL";
+        mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&";
         //setTestData(); // TODO delete when working with gui (getter & setter needed)
         //sendRequest();
         //cleanAndParseResults();
@@ -118,8 +118,8 @@ public class Crawler2 {
             //TODO automative - start = getBestAlternative(start, alternativeLocations);
             //System.out.println("Start set to " + start);
         }
-
-        // get alternatives for start (REQ0JourneyStopsZ0K)
+        /*
+        // get alternatives for dest (REQ0JourneyStopsZ0K)
         alternatives = mBahn.getElementsByAttributeValue("name",
                 "REQ0JourneyStopsZ0K");
         alternatives = alternatives.first().children();
@@ -135,6 +135,7 @@ public class Crawler2 {
             // dest = getBestAlternative(start, alternativeLocations);
             //System.out.println("Dest set to " + dest);
         }
+        */
         return changed;
     }
 
@@ -167,9 +168,8 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
-        if (!mBahn.title().contains("Ihre Auskunft")) {
-            //mBahn = null;
-            if(cleanAndParseAlternativeLocations()){
+        if (!mBahn.title().contains("Abfahrt")) {
+            if (cleanAndParseAlternativeLocations()) {
                 departures = null;//TODO
                 return;
             }
@@ -180,78 +180,86 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
-        // get corrected start and dest
-        Elements locations = mBahn.select("div[class=stdpadding editBtnCon paddingleft]").get(0).children();
-        start = locations.get(1).text();
-        dest = locations.get(2).text();
+        Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
+        String info = information.first().text();
+        start = info.substring(0, info.indexOf(" - ")).trim();
+        Log.i("LateAgainStart", start);
         reqLoop.setCorrectedLocations(start, dest);
-        // get departures table and split into elemets
-        Elements departuresTable = mBahn.select("table[class=ovTable clicktable]").first().children();
-        // remove headlines and footer stuff
-        departuresTable = departuresTable.get(1).children();
-        departuresTable.remove(5);
 
-        departures = new ArrayList<Departure>();
-        for (Element departureTable : departuresTable) {
-            // split to sinlge departures
-            Elements single = departureTable.children();
-            Iterator<Element> elements = single.iterator();
-            Departure departure = new Departure();
-            String[] current = elements.next().text().split(" ");
-            departure.setTimes(current[0], current[1]);
-            departure.setLocations(start, dest);
-            current = elements.next().text().split(" ");
-            if (current.length > 2) {
-                current[0] = current[0] + " " + current[1];
-                current[1] = current[2] + " " + current[3];
+        Elements departureList = mBahn.select("div[class=clicktable").get(0).children();
+
+        departures = new ArrayList<>();
+        for (Element departureTable : departureList) {
+            Departure dep = new Departure();
+            String delay = departureTable.select("span[class=okmsg").text();
+            if (delay.trim().isEmpty()) {
+                delay = "-0";
             }
-            if (current[0].trim().length() < 2) {
-                current[0] = "-0";
+            dep.setDelay(delay);
+            Elements classBold = departureTable.select("span[class=bold");
+            dep.setType(classBold.get(0).text().replace(" ", ""));
+            dep.setTimeStart(classBold.get(1).text());
+            String ownText = departureTable.ownText();
+            String platform, target;
+            if (ownText.contains("Gl. ")) {
+                target = ownText.substring(2, ownText.length() - 8).trim();
+                platform = ownText.substring(ownText.indexOf("Gl."));
+            } else {
+                target = ownText.substring(2, ownText.length() - 5).trim();
+                platform = "-";
             }
-            departure.setDelay(current[0]);
-            current = elements.next().text().split(" ");
-            departure.setDuration(current[1]);
-            departure.setType((elements.next().text().split(" "))[0]);
-            departures.add(departure);
+            dep.setPlatform(platform);
+            dep.setLocDestination(target);
+            departures.add(dep);
         }
+
+         /*
+        String all = "list:";
+        for (int i = 0; i < departureList.size(); i++) {
+            //all += "\n" + i + ": " + departureList.get(i).text();
+            all += "\nDelay: " + departureList.get(i).select("span[class=okmsg").text();
+            Elements classBold = departureList.get(i).select("span[class=bold");
+            all += ", Type: " + classBold.get(0).text();
+            all += ", Time: " + classBold.get(1).text();
+            String ownText = departureList.get(i).ownText();
+            String platform, target;
+            if(ownText.contains("Gl. ")){
+                target = ownText.substring(2, ownText.length()-8).trim();
+                platform = ownText.substring(ownText.indexOf("Gl."));
+            } else {
+                target = ownText.substring(2, ownText.length()-5).trim();
+                platform = "-";
+            }
+            all += ", Platform: "+ platform;
+            all += ", Target: " + target;
+        }
+        Log.i("LateAgainNew", all);
+        return;
+        */
     }
 
     /**
      * prepare and send request to mBahnUrl and save output in mBahn
      */
     private void sendRequest() {
+        Log.i("LateAgainRequest", "Trying input:" + start + ", date:" + date + ", time:" + time);
         new Thread() {
             public void run() {
                 try {
                     mBahn = Jsoup
                             .connect(mBahnUrl)
-                            .data("queryPageDisplayed", "yes")
-                            .data("REQ0JourneyStopsS0A", "1")
-                            .data("REQ0JourneyStopsS0G", start)
-                            // start
-                            .data("REQ0JourneyStopsS0ID", "")
-                            .data("locationErrorShownfrom", "yes")
-                            .data("REQ0JourneyStopsZ0A", "1")
-                            .data("REQ0JourneyStopsZ0G", dest)
-                            // dest
-                            .data("REQ0JourneyStopsZ0ID", "")
-                            .data("locationErrorShownto", "yes")
-                            .data("REQ0JourneyDate", date)
+                            //start location
+                            .data("input", start)
+                            .data("inputRef", "#")
                             // date
-                            .data("REQ0JourneyTime", time)
-                            .data("REQ0HafasSearchForw", "1")
-                            .data("REQ0Tariff_TravellerType.1", "E")
-                            .data("REQ0Tariff_TravellerReductionClass.1", "0")
-                            .data("REQ0Tariff_Class", "2")
-                            .data("REQ0JourneyStops1.0A", "1")
-                            .data("REQ0JourneyStops1.0G", "")
-                            .data("REQ0JourneyStops2.0A", "1")
-                            .data("REQ0JourneyStops2.0G", "")
-                            .data("REQ0HafasChangeTime:0", "1")
-                            .data("existOptimizePrice", "1")
-                            .data("REQ0HafasOptimize1:0", "1")
-                            .data("existOptionBits", "yes")
-                            .data("immediateAvail", "ON").data("start", "Suchen")
+                            .data("date", date)
+                            // time
+                            .data("time", time)
+                            .data("productsFilter", "1111111111000000") //TODO check filters
+                            .data("REQTrain_name", dest) //TODO testing only
+                            .data("maxJourneys", "15") //todo fewer?
+                            .data("boardType", "Abfahrt")
+                            .data("ao", "yes").data("start", "Suchen")
                             .userAgent("Mozilla").post();
                 } catch (UnknownHostException e) {
                     Log.e("LateAgain", "No connection!!");

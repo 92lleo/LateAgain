@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main);
 
         mStartView = (AutoCompleteTextView) findViewById(R.id.t_start);
-        mDestView = (AutoCompleteTextView) findViewById(R.id.t_dest);
+        mDestView = (AutoCompleteTextView) findViewById(R.id.t_line);
         mDateView = (TextView) findViewById(R.id.t_date);
 
         setDateTimeNow(null);
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         mOldLocations = mPm.getFromKey("locationHistory").split(";");
         updateDropdown();
         initLocationView(mStartView);
-        initLocationView(mDestView);
+        //initLocationView(mDestView);
     }
 
     /**
@@ -289,19 +289,19 @@ public class MainActivity extends AppCompatActivity {
     public void search(View view) {
         String start, dest;
         start = mStartView.getText().toString().trim();
-        dest = mDestView.getText().toString().trim();
+        //dest = mDestView.getText().toString().trim();
 
-        mPm.setFromKey("lastDestination", dest);
+        //mPm.setFromKey("lastLine", dest);
         mPm.setFromKey("lastStart", start);
 
-        if (start.isEmpty() || dest.isEmpty()) {
-            showToast("No emtpy fields!");
-        } else if (start.equalsIgnoreCase(dest)) {
-            showToast("No equal locations");
+        if (start.isEmpty()) {
+            showToast("Start must not be empty!");
+        //} else if (start.equalsIgnoreCase(dest)) {
+        //    showToast("No equal locations");
         } else {
             mReqLoop = new RequestLoop(this);
             ArrayList<Departure> deps;
-            deps = mReqLoop.getDepartures(start, dest);
+            deps = mReqLoop.getDepartures(start, ""); //Dest empty for now
             if (deps == null) {
                 return;
             }
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
             Departure dep;
             for (int i = 0; i < deps.size(); i++) {
                 dep = deps.get(i);
-                depsString[i] = dep.getTimeStart() + " (" + dep.getDelay() + ") " + dep.getType();
+                depsString[i] = dep.getTimeStart() + " (" + dep.getDelay() + ") " + dep.getType() + " to " + dep.getLocDestination();
             }
             DeparturesDLV dlv = new DeparturesDLV(this, depsString);
             dlv.showdialog();
@@ -328,6 +328,9 @@ public class MainActivity extends AppCompatActivity {
      * @param view view that called the action
      */
     public void stopAll(View view) {
+        if (mReqLoop == null || !mReqLoop.isAlive()) {
+            return;
+        }
         mReqLoop.interrupt();
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
@@ -351,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
             field = (EditText) findViewById(R.id.t_start);
             field.setText(location);
         } else if (whichLoc == 1) {
-            field = (EditText) findViewById(R.id.t_dest);
+            field = (EditText) findViewById(R.id.t_line);
             field.setText(location);
         }
         mReqLoop.setAlternativeLocation(whichLoc, location);
@@ -385,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
     public void setCorrectedLocations(String start, String dest) {
         EditText startField, destField;
         startField = (EditText) findViewById(R.id.t_start);
-        destField = (EditText) findViewById(R.id.t_dest);
+        destField = (EditText) findViewById(R.id.t_line);
         try {
             startField.setText(start);
             destField.setText(dest);

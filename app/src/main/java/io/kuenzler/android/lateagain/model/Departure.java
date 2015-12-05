@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class Departure {
 
-    String locStart, locDestination, timeStart, timeDestination, type, delay, duration;
+    String locStart, locDestination, timeStart, timeDestination, type, delay, duration, platform;
 
     /**
      *
@@ -40,18 +40,20 @@ public class Departure {
         locDestination = dest;
     }
 
+    public void setLocStart(String start) {
+        locStart = start;
+
+    }
+
+    public void setDest(String dest) {
+        locDestination = dest;
+    }
+
     /**
      * @return the locStart
      */
     public String getLocStart() {
         return locStart;
-    }
-
-    /**
-     * @param locStart the locStart to set
-     */
-    public void setLocStart(String locStart) {
-        this.locStart = locStart;
     }
 
     /**
@@ -138,10 +140,17 @@ public class Departure {
         this.duration = duration;
     }
 
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
     @Override
     public String toString() {
-        return "From " + locStart + " to " + locDestination + " (" + type
-                + "), " + timeStart + "-" + timeDestination + " (" + duration
-                + "). Delay: " + delay;
+        return "From " + locStart + ", Platform " + platform + " to " + locDestination + " (" + type
+                + "), at " + timeStart + "with " + delay + "delay.";
     }
 }

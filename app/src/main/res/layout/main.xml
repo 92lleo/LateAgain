@@ -18,7 +18,7 @@
     <AutoCompleteTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/t_dest"
+        android:id="@+id/t_line"
         android:layout_below="@+id/t_start"
         android:layout_alignEnd="@+id/t_start"
         android:layout_toEndOf="@+id/l_from" />
@@ -29,16 +29,16 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="From"
         android:id="@+id/l_from"
-        android:layout_above="@+id/t_dest"
+        android:layout_above="@+id/t_line"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="To"
-        android:id="@+id/l_to"
-        android:layout_alignBottom="@+id/t_dest"
+        android:text="Line:"
+        android:id="@+id/l_line"
+        android:layout_alignBottom="@+id/t_line"
         android:layout_alignParentStart="true" />
 
     <Button
@@ -84,8 +84,10 @@
         android:inputType="date"
         android:ems="10"
         android:id="@+id/t_date"
-        android:layout_below="@+id/t_dest"
-        android:text="Date" />
+        android:layout_below="@+id/t_line"
+        android:text="Date"
+        android:editable="false"
+        android:enabled="false" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -93,9 +95,10 @@
         android:inputType="time"
         android:ems="10"
         android:id="@+id/t_time"
-        android:layout_below="@+id/t_dest"
+        android:layout_below="@+id/t_line"
         android:layout_toEndOf="@+id/t_date"
-        android:text="Time" />
+        android:text="Time"
+        android:enabled="false" />
 
     <Button
         android:layout_width="wrap_content"

@@ -16,7 +16,7 @@ import io.kuenzler.android.lateagain.model.Departure;
  */
 public class RequestLoop extends Thread {
 
-    private Crawler mCrawler;
+    private Crawler2 mCrawler;
     private final MainActivity mMain;
     private final int mRefreshRate = 10000; //refresh 10 s
     private String mStart, mDest, mTime, mDate;
@@ -44,7 +44,7 @@ public class RequestLoop extends Thread {
         // TODO times has to be passed, too (testdata for now)
         mStart = start;
         mDest = dest;
-        mCrawler = new Crawler(this);
+        mCrawler = new Crawler2(this);
         Log.i("LateAgain", "Start: " + start + ", Dest: " + dest);
         ArrayList<Departure> departures = mCrawler.getDepartures(null, null, mStart, mDest);
         if (departures == null || departures.isEmpty()) {
