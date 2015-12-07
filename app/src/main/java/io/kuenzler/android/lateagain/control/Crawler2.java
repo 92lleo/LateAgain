@@ -98,15 +98,14 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
-        if (!mBahn.title().contains("Ihre Anfrage")) {
+        if (!mBahn.title().contains("Abfahrt/Ankunft")) {
             throw new NoSuchElementException(
                     "Did expect drop down dialog, found site " + mBahn.title());
         }
 
         // get alternatives for start (REQ0JourneyStopsS0K)
-        Elements alternatives = mBahn.getElementsByAttributeValue("name",
-                "REQ0JourneyStopsS0K");
-        alternatives = alternatives.first().children();
+        Elements alternatives = mBahn.select("select[class=sqproduct").get(0).children();
+        //alternatives = alternatives.first().children();
         ArrayList<String> alternativeLocations = new ArrayList<String>();
         //TODO System.out.println("--Alternatives to " + start);
         for (Element x : alternatives) {
@@ -169,7 +168,7 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
-        if (!mBahn.title().contains("Abfahrt")) {
+        if (mBahn.text().contains("Ihre Eingabe ist nicht eindeutig")) {
             if (cleanAndParseAlternativeLocations()) {
                 departures = null;//TODO
                 return;
@@ -181,7 +180,6 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
-        Log.i("wtf", mBahn.title());
         Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
         String info = information.first().text();
         try {
@@ -224,30 +222,6 @@ public class Crawler2 {
             dep.setLocDestination(target);
             departures.add(dep);
         }
-
-         /*
-        String all = "list:";
-        for (int i = 0; i < departureList.size(); i++) {
-            //all += "\n" + i + ": " + departureList.get(i).text();
-            all += "\nDelay: " + departureList.get(i).select("span[class=okmsg").text();
-            Elements classBold = departureList.get(i).select("span[class=bold");
-            all += ", Type: " + classBold.get(0).text();
-            all += ", Time: " + classBold.get(1).text();
-            String ownText = departureList.get(i).ownText();
-            String platform, target;
-            if(ownText.contains("Gl. ")){
-                target = ownText.substring(2, ownText.length()-8).trim();
-                platform = ownText.substring(ownText.indexOf("Gl."));
-            } else {
-                target = ownText.substring(2, ownText.length()-5).trim();
-                platform = "-";
-            }
-            all += ", Platform: "+ platform;
-            all += ", Target: " + target;
-        }
-        Log.i("LateAgainNew", all);
-        return;
-        */
     }
 
     /**
