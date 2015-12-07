@@ -56,7 +56,12 @@ public class Crawler2 {
         //Todo
         setTestData();
         sendRequest();
-        cleanAndParseResults();
+        try {
+            cleanAndParseResults();
+        } catch (NoSuchElementException e) {
+            //reqLoop.getmMain().showToast("No departure in near future!");
+            Log.e("LateAgain", e.toString());
+        }
         return departures;
     }
 
@@ -89,7 +94,6 @@ public class Crawler2 {
             throw new NoSuchElementException(
                     "Did expect drop down dialog, found site " + mBahn.title());
         }
-
         // get alternatives for start (select[class=sqproduct)
         Elements alternatives = mBahn.select("select[class=sqproduct").get(0).children();
         ArrayList<String> alternativeLocations = new ArrayList<>();
@@ -147,6 +151,10 @@ public class Crawler2 {
         while (mBahn == null) {
             //wait for request
         }
+        if (mBahn.text().contains("Keine aktuellen Informationen verfügbar.")) {
+            throw new NoSuchElementException(
+                    "No departures in near future!");
+        }
         Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
         String info = information.first().text();
         try {
@@ -178,11 +186,17 @@ public class Crawler2 {
             dep.setTimeStart(classBold.get(1).text());
             String ownText = departureTable.ownText();
             String platform, target;
-            if (ownText.contains("Gl. ")) {
+            if (ownText.contains(",  Gl.")) {
                 target = ownText.substring(2, (ownText.indexOf(",  Gl.") - 1)).trim();
-                platform = ownText.substring(ownText.indexOf("Gl.") +3).trim();
-            } else {
+                platform = ownText.substring(ownText.indexOf("Gl.") + 3).trim();
+            } else if (ownText.contains("Gl.")) {
+                target = ownText.substring(2, (ownText.indexOf("Gl.") - 3)).trim();
+                platform = ownText.substring(ownText.indexOf("Gl.") + 3).trim();
+            } else if (ownText.contains("k.A.")) {
                 target = ownText.substring(2, (ownText.indexOf("k.A.") - 1)).trim();
+                platform = "-";
+            } else {
+                target = ownText.substring(2, ownText.length() - 1).trim();
                 platform = "-";
             }
             dep.setPlatform(platform);

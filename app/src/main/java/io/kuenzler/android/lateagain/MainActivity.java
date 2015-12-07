@@ -199,8 +199,7 @@ public class MainActivity extends AppCompatActivity {
      * @param view just to call from click
      */
     public void exit(View view) {
-        NotificationManager notifManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notifManager.cancelAll();
+        stopAll(null);
         finish();
         System.exit(0);
     }

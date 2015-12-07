@@ -176,4 +176,12 @@ public class RequestLoop extends Thread {
     public void setCorrectedLocations(String start, String dest) {
         mMain.setCorrectedLocations(start, dest);
     }
+
+    /**
+     *
+     * @return
+     */
+    public MainActivity getmMain() {
+        return mMain;
+    }
 }
