@@ -58,6 +58,20 @@ public class MainActivity extends AppCompatActivity {
         mDestView = (AutoCompleteTextView) findViewById(R.id.t_line);
         mDateView = (TextView) findViewById(R.id.t_date);
 
+        /*setDateTimeNow(null);
+        mPm = new PropertiesManager(this);
+        mOldLocations = mPm.getFromKey("locationHistory").split(";");
+        updateDropdown();
+        initLocationView(mStartView);
+        initLocationView(mDestView);
+
+        String[] lines = {"Bus", "Str", "U", "S"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(lines));
+        mDestView.setAdapter(adapter);*/
+    }
+
+    protected void onStart() {
+        super.onStart();
         setDateTimeNow(null);
         mPm = new PropertiesManager(this);
         mOldLocations = mPm.getFromKey("locationHistory").split(";");
@@ -124,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (time.equals("00:00:00")) {
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle("Departure now!")
-                    .setContentText("00:00:00" + " remaining. (Platrform +"+platform+")")
+                    .setContentTitle(type + " departs now on platform " + platform + "!")
+                    .setContentText("00:00:00" + " remaining. (Platrform " + platform + ")")
                     .setTicker("Train should be there")
                     .setNumber(1)
                     .setLargeIcon(bitmap)
@@ -139,10 +153,9 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.notify(0, noti);
 
         } else {
-
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle("Next Departure at " + departure + " (" + type + ")")
-                    .setContentText(time + " remaining. (Platform "+platform+")")
+                    .setContentTitle("Next " + type + " at " + departure)
+                    .setContentText(time + " remaining. (Platform " + platform + ")")
                     .setTicker("Countdown started to " + departure)
                     .setNumber(1)
                     .setLargeIcon(bitmap)

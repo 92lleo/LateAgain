@@ -37,18 +37,8 @@ public class Crawler2 {
      */
     public Crawler2(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
-        //mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&";
+        //mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&"; old crawler
         mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?ld=15061&rt=1&use_realtime_filter=1&webview=&";
-        //setTestData(); // TODO delete when working with gui (getter & setter needed)
-        //sendRequest();
-        //cleanAndParseResults();
-        // if (!departures.isEmpty()) {
-        //     for (Departure d : departures) {
-        //        System.out.println(d);
-        //    }
-        //   DateCalculator dc = new DateCalculator(this);
-        //    dc.countToDeparture(departures.get(1));
-        //}
     }
 
     /**
@@ -84,9 +74,6 @@ public class Crawler2 {
         if (this.time == null) {
             time = ft.format(today);
         }
-        //TODO start = "Eching";
-        //dest = "Feldmoching";
-        //System.out.println(date + "-" + time + ", " + start + " to " + dest);
     }
 
     /**
@@ -103,10 +90,9 @@ public class Crawler2 {
                     "Did expect drop down dialog, found site " + mBahn.title());
         }
 
-        // get alternatives for start (REQ0JourneyStopsS0K)
+        // get alternatives for start (select[class=sqproduct)
         Elements alternatives = mBahn.select("select[class=sqproduct").get(0).children();
-        //alternatives = alternatives.first().children();
-        ArrayList<String> alternativeLocations = new ArrayList<String>();
+        ArrayList<String> alternativeLocations = new ArrayList<>();
         //TODO System.out.println("--Alternatives to " + start);
         for (Element x : alternatives) {
             System.out.println(x.text()); // TODO
@@ -116,26 +102,7 @@ public class Crawler2 {
             reqLoop.getAlternativeLocations(alternativeLocations, 0);
             //TODO start
             //TODO automative - start = getBestAlternative(start, alternativeLocations);
-            //System.out.println("Start set to " + start);
         }
-        /*
-        // get alternatives for dest (REQ0JourneyStopsZ0K)
-        alternatives = mBahn.getElementsByAttributeValue("name",
-                "REQ0JourneyStopsZ0K");
-        alternatives = alternatives.first().children();
-        alternativeLocations = new ArrayList<String>();
-        //System.out.println("--Alternatives to " + dest); // TODO
-        for (Element x : alternatives) {
-            System.out.println(x.text());
-            alternativeLocations.add(x.text());
-        }
-        if (!alternativeLocations.isEmpty()) {
-            reqLoop.getAlternativeLocations(alternativeLocations, 1);
-            // TODO dest
-            // dest = getBestAlternative(start, alternativeLocations);
-            //System.out.println("Dest set to " + dest);
-        }
-        */
         return changed;
     }
 
@@ -193,7 +160,7 @@ public class Crawler2 {
         Elements departureList;
         try {
             departureList = mBahn.select("div[class=clicktable").get(0).children();
-        } catch (IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             Log.e("LateAgain", "No departures with that line");
             return;
         }
@@ -212,10 +179,10 @@ public class Crawler2 {
             String ownText = departureTable.ownText();
             String platform, target;
             if (ownText.contains("Gl. ")) {
-                target = ownText.substring(2, (ownText.indexOf("Gl.")-1)).trim();
-                platform = ownText.substring(ownText.indexOf("Gl."));
+                target = ownText.substring(2, (ownText.indexOf(",  Gl.") - 1)).trim();
+                platform = ownText.substring(ownText.indexOf("Gl.") +3).trim();
             } else {
-                target = ownText.substring(2, ownText.length() - 5).trim();
+                target = ownText.substring(2, (ownText.indexOf("k.A.") - 1)).trim();
                 platform = "-";
             }
             dep.setPlatform(platform);
@@ -242,8 +209,8 @@ public class Crawler2 {
                             // time
                             .data("time", time)
                             .data("productsFilter", "1111111111000000") //TODO check filters
-                            .data("REQTrain_name", dest) //TODO testing only
-                            .data("maxJourneys", "15") //todo fewer?
+                            .data("REQTrain_name", dest) //TODO change
+                            .data("maxJourneys", "20") //todo fewer?
                             .data("boardType", "Abfahrt")
                             .data("ao", "yes").data("start", "Suchen")
                             .userAgent("Mozilla").post();
@@ -251,7 +218,7 @@ public class Crawler2 {
                     Log.e("LateAgain", "No connection!!");
                 } catch (IOException | NoSuchElementException e) {
                     Log.e("LateAgain", "Request failed:\n" + e.toString());
-                } catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     Log.e("LateAgain", "Request failed: Nullvalue in post");
                 }
             }
