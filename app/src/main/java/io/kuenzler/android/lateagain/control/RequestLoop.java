@@ -60,22 +60,13 @@ public class RequestLoop extends Thread {
     public void run() {
         mDc = new DateCalculator();
         ArrayList<Departure> departures;
-        Departure departure = null;
-        boolean firstRound = true;
+        Departure departure;
         Crawler2 crawler;
         int i = 0;
         while (!isInterrupted()) {
             crawler = new Crawler2(this);
             i++;
             Log.i("LateAgain RequestLoop", "#" + i);
-            //if (departure != null && mTime == null) {
-            //    mTime = departure.getTimeStart();
-            //    //TODO calculate time failsafe (23-1:00)
-            //    mDate = mDc.getCurrentDate();
-            //} else if (firstRound) {
-            //    mTime = null;
-            //    mDate = null;
-            //}
             departures = crawler.getDepartures(mDate, mTime, mStart, mLine, mFilter);
 
             try {
@@ -85,7 +76,7 @@ public class RequestLoop extends Thread {
                 Log.e("LateAgain", "Expected departure " + mDepartureIndex + " not there.", e);
                 return;
             }
-            Log.i("LateAgainX", "Old: " + mTime + " , new: " + departure.getTimeStart());
+            Log.i("LateAgainTime (RL)", "Old: " + mTime + " , new: " + departure.getTimeStart());
             /*if (!firstRound && !mTime.equals(departure.getTimeStart())) {
               //TODO time problem goes here
                int oldIndex = mDepartureIndex;
@@ -95,22 +86,20 @@ public class RequestLoop extends Thread {
                Log.e("LateAgainBugNow", "decreased index from " + oldIndex + " to " + mDepartureIndex);
                //skip contdown stuff until right one is found
                continue;
-        }*/
-
-        firstRound = false;
-        mCurrent++;
-        long distance = mDc.countToDeparture(departure);
-        countDown(distance, mCurrent, departure);
-        try {
-            Log.d("LateAgainD", "RequestLoop #" + i + " tries to sleep now");
-            sleep(mRefreshRate);
-        } catch (InterruptedException e) {
-            mCurrent = -1;
-            interrupt();
+            }*/
+            mCurrent++;
+            long distance = mDc.countToDeparture(departure);
+            countDown(distance, mCurrent, departure);
+            try {
+                Log.d("LateAgainD", "RequestLoop #" + i + " tries to sleep now");
+                sleep(mRefreshRate);
+            } catch (InterruptedException e) {
+                mCurrent = -1;
+                interrupt();
+            }
         }
-    }
 
-}
+    }
 
     /**
      * Set wanted departure index
@@ -149,11 +138,6 @@ public class RequestLoop extends Thread {
                 }
             }
         }, 0, 1000);
-    }
-
-    private boolean hasDelayChanged() {
-        //TODO int or departure?
-        return false;
     }
 
     /**

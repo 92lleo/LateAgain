@@ -155,18 +155,16 @@ public class Crawler2 {
         }
         Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
         String info = information.first().text();
-        Log.e("LateAgain", "header " + info);
         String newStart;
         try {
             newStart = info.substring(0, info.indexOf(" - ")).trim();
         } catch (Exception e) {
             newStart = info;
-            Log.e("LateAgain", info);
         }
         if (newStart != null) {
             start = newStart;
         }
-        Log.e("LateAgainStart", start);
+        Log.i("LateAgainStart", start);
         mReqLoop.setCorrectedLocations(start, dest);
         Elements departureList;
         try {
@@ -210,20 +208,11 @@ public class Crawler2 {
                 platform = "-";
             }
             dep.setPlatform(platform);
-            Log.e("LateAgain1", dep.toString());
             dep.setLocDestination(target);
             departures.add(dep);
         }
     }
-
-    /**
-     * FOR DEBUGGING ONLY!
-     * @param mBahn
-     */
-    private void saveDocument(Document mBahn) {
-        Log.e("LateAgainDoc", mBahn.outerHtml());
-    }
-
+    
     /**
      * prepare and send request to mBahnUrl and save output in mBahn
      */

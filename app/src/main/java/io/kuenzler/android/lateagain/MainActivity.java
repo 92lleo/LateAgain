@@ -17,7 +17,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-//import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private RequestLoop mReqLoop;
     private PropertiesManager mPm;
     private String[] mOldLocations;
+
+    private int mOldDelay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,15 +139,39 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clock);
+        String title, text;
 
-        if (time.equals("00:00:00")) {
+        String[] times = time.split(":");
+        boolean isInPast = false;
+        for (String s : times) {
+            try {
+                int x = Integer.parseInt(s);
+                if (x < 0) {
+                    isInPast = true;
+                }
+            } catch (NumberFormatException e) {
+                isInPast = true;
+            }
+        }
+        title = "";
+        if (isInPast) {
+            title = (dep.getType() + " is already gone");
+        } else if (time.equals("00:00:00")) {
+            isInPast = true;
+            if (dep.getPlatform().equals("-")) {
+                title = (dep.getType() + " departs now!");
+            } else {
+                title = (dep.getType() + " departs now on platform " + dep.getPlatform() + "!");
+            }
+        }
+        text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart();
+        if (isInPast) {
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle(dep.getType() + " departs now on platform " + dep.getPlatform() + "!")
-                    .setContentText("00:00:00" + " remaining. (Platrform " + dep.getPlatform() + ")")
+                    .setContentTitle(title)
+                    .setContentText(text)
                     .setTicker("Train should be there")
                     .setNumber(1)
                     .setLargeIcon(bitmap)
-                    //.setSmallIcon(R.drawable.clock)
                     .setSmallIcon(R.drawable.train)
                     .setContentIntent(pIntent)
                     .setOngoing(false)
@@ -156,10 +181,24 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.notify(0, noti);
 
         } else {
+            times = time.split(":");
+            if (!times[0].equals("00")) {
+                time = times[0] + ":" + times[1] + ":" + times[2];
+            } else if (!times[1].equals("00")) {
+                time = times[1] + ":" + times[2];
+            } else {
+                time = times[2] + "s";
+            }
+            text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart() + " (" + dep.getDelay() + ")";
+            if (dep.getPlatform().equals("-")) {
+                title = time + " left to get to " + dep.getType();
+            } else {
+                title = time + " left to get to platform " + dep.getPlatform();
+            }
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle("Next " + dep.getType() + " at " + departure)
-                    .setContentText(time + " remaining. (Platform " + dep.getPlatform() + ")")
-                    .setTicker("Countdown started to " + departure)
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setTicker(text)
                     .setNumber(1)
                     .setLargeIcon(bitmap)
                     //.setSmallIcon(R.drawable.clock)
@@ -175,7 +214,31 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.notify(0, noti);
         }
 
-        if (time.endsWith("0:02:00")) {
+        int newDelay = -1;
+        try{
+            newDelay = Integer.parseInt(dep.getDelay());
+        } catch (NumberFormatException e){
+            //ignore
+        }
+        if (mOldDelay>=0 && newDelay!=mOldDelay) {
+            final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            new Thread() {
+
+                public void run() {
+                    try {
+                        v.vibrate(400);
+                        sleep(300);
+                        v.vibrate(100);
+                        sleep(200);
+                        v.vibrate(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        }
+        mOldDelay = newDelay;
+        if (time.endsWith("02:00")) {
 
             final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
             new Thread() {
@@ -309,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
         String start, dest;
         start = mStartView.getText().toString().trim();
         dest = mDestView.getText().toString().trim();
-
+        mOldDelay = -1;
         //mPm.setFromKey("lastLine", dest);
         mPm.setFromKey("lastStart", start);
 
