@@ -39,6 +39,7 @@ public class Crawler {
     public Crawler(RequestLoop reqLoop) {
         this.reqLoop = reqLoop;
         mBahnUrl = "http://mobile.bahn.de/bin/mobil/query.exe/dox?country=DEU&rt=1&use_realtime_filter=1&webview=&searchMode=NORMAL";
+        throw new RuntimeException("Should not be called!");
         //setTestData(); // TODO delete when working with gui (getter & setter needed)
         // sendRequest();
         //cleanAndParseResults();

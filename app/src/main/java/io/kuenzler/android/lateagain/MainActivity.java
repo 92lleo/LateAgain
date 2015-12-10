@@ -27,6 +27,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import io.kuenzler.android.lateagain.control.DateCalculator;
 import io.kuenzler.android.lateagain.control.PropertiesManager;
 import io.kuenzler.android.lateagain.control.RequestLoop;
 import io.kuenzler.android.lateagain.model.Departure;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //ACRA.init(this.getApplication());
+        this.getApplication();
         setContentView(R.layout.main);
 
         mStartView = (AutoCompleteTextView) findViewById(R.id.t_start);
@@ -128,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param time      countdown time HH.mm.ss
      * @param departure departure time HH.mm
-     * @param type      transportation type (s,bus,u)
+     * @param dep       transportation type (s,bus,u)
      */
-    public void createNotification(String time, String departure, String type, String platform) {
+    public void createNotification(String time, String departure, Departure dep) {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
@@ -138,8 +141,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (time.equals("00:00:00")) {
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle(type + " departs now on platform " + platform + "!")
-                    .setContentText("00:00:00" + " remaining. (Platrform " + platform + ")")
+                    .setContentTitle(dep.getType() + " departs now on platform " + dep.getPlatform() + "!")
+                    .setContentText("00:00:00" + " remaining. (Platrform " + dep.getPlatform() + ")")
                     .setTicker("Train should be there")
                     .setNumber(1)
                     .setLargeIcon(bitmap)
@@ -154,8 +157,8 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             Notification noti = new Notification.Builder(this)
-                    .setContentTitle("Next " + type + " at " + departure)
-                    .setContentText(time + " remaining. (Platform " + platform + ")")
+                    .setContentTitle("Next " + dep.getType() + " at " + departure)
+                    .setContentText(time + " remaining. (Platform " + dep.getPlatform() + ")")
                     .setTicker("Countdown started to " + departure)
                     .setNumber(1)
                     .setLargeIcon(bitmap)
@@ -318,7 +321,11 @@ public class MainActivity extends AppCompatActivity {
             checkLine(dest);
             mReqLoop = new RequestLoop(this);
             ArrayList<Departure> deps;
-            deps = mReqLoop.getDepartures(start, dest); //Dest empty for now
+            String date, time, filter; //TODO date,time & filter hard for now
+            date = DateCalculator.getCurrentDate();
+            time = DateCalculator.getCurrentTime();
+            filter = "1111111111000000";
+            deps = mReqLoop.getDepartures(date, time, start, dest, filter); //Dest empty for now
             if (deps == null) {
                 return;
             }

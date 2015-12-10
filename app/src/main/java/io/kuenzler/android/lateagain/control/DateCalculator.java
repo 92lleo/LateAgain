@@ -5,6 +5,7 @@ import android.util.Log;
 import io.kuenzler.android.lateagain.model.Departure;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -127,19 +128,29 @@ public class DateCalculator {
         cal.set(Calendar.MINUTE, Integer.parseInt(splittedTime[1]));
         cal.set(Calendar.SECOND, 0); //to direct minute
         cal.set(Calendar.MILLISECOND, 0); //to direct minute
-        int delay = Integer.parseInt(departure.getDelay().substring(1));
+        int delay = Integer.parseInt(departure.getDelay().substring(1)); //TODO if not just delay
         long departureTime = cal.getTimeInMillis() + (delay * 60000);
         Date date = new Date(departureTime);
         return getDateDifferenceFromNow(date);
     }
 
     /**
-     *
      * @return
      */
-    public String getCurrentDate() {
+    public static String getCurrentDate() {
         Date today = new Date();
         DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
         return formatter.format(today);
+    }
+
+    public static String getCurrentTime() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm");//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
+
+    public static long getDistancems(long timestamp) {
+        return System.currentTimeMillis() - timestamp;
     }
 }

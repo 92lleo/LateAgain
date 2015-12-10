@@ -2,6 +2,8 @@ package io.kuenzler.android.lateagain.model;
 
 import java.util.Date;
 
+import io.kuenzler.android.lateagain.control.DateCalculator;
+
 /**
  * @author Leonhard Künzler
  * @version 1.0
@@ -9,13 +11,15 @@ import java.util.Date;
  */
 public class Departure {
 
-    String locStart, locDestination, timeStart, timeDestination, type, delay, duration, platform;
+    private String locStart, locDestination, timeStart, timeDestination, type, delay, duration, platform;
+    private long timestamp;
 
     /**
      *
      */
     public Departure() {
         // TODO something here?
+        timestamp = System.currentTimeMillis();
     }
 
     /**
@@ -151,6 +155,24 @@ public class Departure {
     @Override
     public String toString() {
         return "From " + locStart + ", Platform " + platform + " to " + locDestination + " (" + type
-                + "), at " + timeStart + "with " + delay + "delay.";
+                + "), at " + timeStart + " with " + delay + " delay. ("
+                + DateCalculator.getDistancems(timestamp) + "ms ago)";
+    }
+
+    static boolean verifyDeparture(Departure dep) {
+        boolean result = true;
+        if (dep.getLocStart() == null) {
+            result = false;
+        }
+        if (dep.getLocDestination() == null) {
+            // not needed for now // result = false;
+        }
+        try {
+            Integer.parseInt(dep.getDelay());
+        } catch (NumberFormatException e) {
+            result = false;
+        }
+
+        return result;
     }
 }
