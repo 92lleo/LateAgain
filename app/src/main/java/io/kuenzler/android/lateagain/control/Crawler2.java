@@ -212,7 +212,7 @@ public class Crawler2 {
             departures.add(dep);
         }
     }
-    
+
     /**
      * prepare and send request to mBahnUrl and save output in mBahn
      */

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.kuenzler.android.lateagain"
-    android:versionCode="11"
-    android:versionName="1.6.0">
+    android:versionCode="12"
+    android:versionName="1.6.1">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,9 @@
         <activity
             android:name=".NotificationResponseAcitivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="71f4a59868bb7f1e447e0c921eca943aa76b27a5" />
     </application>
 
 </manifest>

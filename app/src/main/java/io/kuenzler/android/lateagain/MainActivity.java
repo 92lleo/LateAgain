@@ -11,18 +11,30 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.SearchEvent;
+
+import io.fabric.sdk.android.Fabric;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -50,11 +62,12 @@ public class MainActivity extends AppCompatActivity {
     private String[] mOldLocations;
 
     private int mOldDelay;
+    private boolean ongoingNotification = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //ACRA.init(this.getApplication());
+        Fabric.with(this, new Crashlytics());
         this.getApplication();
         setContentView(R.layout.main);
 
@@ -96,8 +109,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    updateDropdown();
-                    actv.showDropDown();
+                    try {
+                        updateDropdown();
+                        actv.showDropDown();
+                    } catch (WindowManager.BadTokenException e) {
+                        Crashlytics.log(e.toString());
+                        //TODO: log inconsistence
+                    }
                 }
             }
         });
@@ -156,6 +174,10 @@ public class MainActivity extends AppCompatActivity {
         title = "";
         if (isInPast) {
             title = (dep.getType() + " is already gone");
+            Answers.getInstance().logContentView(new ContentViewEvent()
+                    .putContentName("Countdown finnished")
+                    .putContentType("to "+dep.getLocStart())
+                    .putContentId("1"));
         } else if (time.equals("00:00:00")) {
             isInPast = true;
             if (dep.getPlatform().equals("-")) {
@@ -207,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     //.addAction(0, "<< Prev", pIntent)
                     //.addAction(0, "Stop", pIntent)
                     //.addAction(0, "Next >>", pIntent)
-                    .setOngoing(true)
+                    .setOngoing(ongoingNotification)
                     .build();
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             noti.flags |= Notification.FLAG_AUTO_CANCEL;
@@ -215,12 +237,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         int newDelay = -1;
-        try{
+        try {
             newDelay = Integer.parseInt(dep.getDelay());
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             //ignore
         }
-        if (mOldDelay>=0 && newDelay!=mOldDelay) {
+        if (mOldDelay >= 0 && newDelay != mOldDelay) {
             final Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
             new Thread() {
 
@@ -372,8 +394,10 @@ public class MainActivity extends AppCompatActivity {
         String start, dest;
         start = mStartView.getText().toString().trim();
         dest = mDestView.getText().toString().trim();
+        Answers.getInstance().logSearch(new SearchEvent()
+                .putQuery("Searched: " + start + ", " + dest));
         mOldDelay = -1;
-        //mPm.setFromKey("lastLine", dest);
+        //mPm.setFromKey("lastLine", dest); depr. -> dest eq line
         mPm.setFromKey("lastStart", start);
 
         if (start.isEmpty()) {
@@ -384,11 +408,11 @@ public class MainActivity extends AppCompatActivity {
             checkLine(dest);
             mReqLoop = new RequestLoop(this);
             ArrayList<Departure> deps;
-            String date, time, filter; //TODO date,time & filter hard for now
+            String date, time, filter; //TODO: date,time & filter hard for now
             date = DateCalculator.getCurrentDate();
             time = DateCalculator.getCurrentTime();
             filter = "1111111111000000";
-            deps = mReqLoop.getDepartures(date, time, start, dest, filter); //Dest empty for now
+            deps = mReqLoop.getDepartures(date, time, start, dest, filter); //TODO: dest to line
             if (deps == null) {
                 return;
             }
@@ -403,45 +427,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void expandNotificationBar() {
+        try {
+
+            @SuppressWarnings("ResourceType")  //works
+                    Object service = getSystemService("statusbar");
+            Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
+            Method expand = statusbarManager.getMethod("expandNotificationsPanel");
+            expand.invoke(service);
+        } catch (Exception e) {
+            //
+        }
+    }
+
     private void checkLine(String unfixedLine) {
+        String[] recognizedStrings = {"bus", "bu", "b", "str", "st", "s", "u", "v", "re", "ic"};
         String line = unfixedLine.toLowerCase().trim();
         boolean recognized = false;
         if (line.isEmpty()) {
             recognized = true;
-        }
-        if (line.contains("bus")) {
-            recognized = true;
-        }
-        if (line.contains("bu")) {
-            recognized = true;
-        }
-        if (line.contains("b")) {
-            recognized = true;
-        }
-        if (line.contains("str")) {
-            recognized = true;
-        }
-        if (line.contains("st")) {
-            recognized = true;
-        }
-        if (line.contains("s")) {
-            recognized = true;
-        }
-        if (line.contains("u")) {
-            recognized = true;
-        }
-        if (line.contains("v")) {
-            recognized = true;
-        }
-        try {
-            Integer.parseInt(line);
-            recognized = true;
-        } catch (NumberFormatException e) {
-            // not an integer!
+        } else {
+            for (String rs : recognizedStrings) {
+                if (line.contains(rs)) {
+                    recognized = true;
+                }
+            }
+            if (line.isEmpty()) {
+                recognized = true;
+            }
+            try {
+                Integer.parseInt(line);
+                recognized = true;
+            } catch (NumberFormatException e) {
+                // not an integer, continue
+            }
         }
 
         if (!recognized) {
-            showToast("Your Line is not recognized. Try something like: S, S1, 1 , bus, bu, 650, str, u");
+            showToast("Your line is not recognized. Try something like: S, S1, 1 , bus, bu, 650, str, u, re");
         }
     }
 
@@ -449,6 +472,22 @@ public class MainActivity extends AppCompatActivity {
      * @param index index of desired departure
      */
     public void startCountdown(int index) {
+        CheckBox cb = (CheckBox) findViewById(R.id.cb_ongoing);
+        ongoingNotification = cb.isSelected();
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.snackbarCoordinatorLayout);
+        final Snackbar snackbar = Snackbar
+                .make(coordinatorLayout, "Startet new countdown...", Snackbar.LENGTH_LONG);
+        snackbar.setAction("Show", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                expandNotificationBar();
+                snackbar.dismiss();
+                //moveTaskToBack(true); //homebutton alternative
+                startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
+            }
+        });
+        snackbar.show();
+
         mReqLoop.setDepartureIndex(index);
         mReqLoop.start();
     }
@@ -457,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
      * @param view view that called the action
      */
     public void stopAll(View view) {
+        ongoingNotification = false;
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
         if (mReqLoop == null || !mReqLoop.isAlive()) {

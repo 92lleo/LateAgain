@@ -109,4 +109,20 @@
         android:layout_below="@+id/t_date"
         android:layout_toEndOf="@+id/b_search" />
 
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/snackbarCoordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ongoing Not."
+        android:id="@+id/cb_ongoing"
+        android:layout_alignTop="@+id/b_exit"
+        android:layout_alignEnd="@+id/t_time"
+        android:checked="false" />
+
 </RelativeLayout>
