@@ -106,29 +106,37 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initLocationView(final AutoCompleteTextView actv) {
         actv.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    try {
-                        updateDropdown();
-                        actv.showDropDown();
-                    } catch (WindowManager.BadTokenException e) {
-                        Crashlytics.log(e.toString());
-                        //TODO: log inconsistence
-                    }
-                }
-            }
-        });
-        actv.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    search(null);
-                }
-                return true;
-            }
-        });
+                                          @Override
+                                          public void onFocusChange(View v, boolean hasFocus) {
+                                              try {
+                                                  if (hasFocus) {
+                                                      updateDropdown();
+                                                      actv.showDropDown();
+                                                  }
+                                              } catch (WindowManager.BadTokenException e) {
+                                                  Crashlytics.log(e.toString());
+                                                  //TODO: log inconsistence
+                                              } catch (Exception e){
+                                                  Crashlytics.log(e.toString());
+                                              }
+                                          }
+                                      }
+
+        );
+        actv.setOnKeyListener(new View.OnKeyListener()
+
+                              {
+                                  @Override
+                                  public boolean onKey(View v, int keyCode, KeyEvent event) {
+                                      if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                                              (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                                          search(null);
+                                      }
+                                      return true;
+                                  }
+                              }
+
+        );
     }
 
     @Override
@@ -140,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Updates dropdown dialogs with current oldLocations
      */
+
     private void updateDropdown() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(mOldLocations));
         mStartView.setAdapter(adapter);
@@ -176,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             title = (dep.getType() + " is already gone");
             Answers.getInstance().logContentView(new ContentViewEvent()
                     .putContentName("Countdown finnished")
-                    .putContentType("to "+dep.getLocStart())
+                    .putContentType("to " + dep.getLocStart())
                     .putContentId("1"));
         } else if (time.equals("00:00:00")) {
             isInPast = true;
