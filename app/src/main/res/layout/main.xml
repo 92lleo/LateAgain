@@ -108,7 +108,7 @@
         android:id="@+id/b_stop"
         android:layout_below="@+id/t_date"
         android:layout_toEndOf="@+id/b_search"
-        android:enabled="false" />
+        android:enabled="true" />
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/snackbarCoordinatorLayout"
@@ -130,7 +130,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Search for a departure station in &quot;from&quot; line. Try to use exact names. Typos will be corrected. You can filter the results by writing your line in &quot;line&quot;. Start searcing with &quot;Search&quot;. A notification will appear and inform you about the departure. The &quot;Stop&quot; button does not work right now. Use &quot;Exit&quot; and restart the application. For now time &amp; date is your current, you can&apos;t change it. Feedback is welcome! Write me to lateagain@kuenzler.io"
+        android:text="Search for a departure station in &quot;from&quot; line. Try to use exact names. Typos will be corrected. You can filter the results by writing your line in &quot;line&quot;. Start searcing with &quot;Search&quot;. A notification will appear and inform you about the departure. For now time &amp; date is your current, you can&apos;t change it. Feedback is welcome! Write me to lateagain@kuenzler.io"
         android:id="@+id/t_explanation"
         android:layout_below="@+id/b_exit"
         android:layout_alignParentStart="true"

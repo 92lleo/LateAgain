@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +39,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import io.kuenzler.android.lateagain.control.DateCalculator;
+import io.kuenzler.android.lateagain.control.util.DateCalculator;
 import io.kuenzler.android.lateagain.control.PropertiesManager;
 import io.kuenzler.android.lateagain.control.RequestLoop;
 import io.kuenzler.android.lateagain.model.Departure;
@@ -48,6 +49,11 @@ import io.kuenzler.android.lateagain.view.LocationsDLV;
 /**
  * @author Leonhard Künzler
  * @version 0.7
+ *
+ * //TODO: search in extra thread
+ * //TODO: loop in extra thread
+ * //TODO: use time and date
+ * //TODO: use filter
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -116,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                                               } catch (WindowManager.BadTokenException e) {
                                                   Crashlytics.log(e.toString());
                                                   //TODO: log inconsistence
-                                              } catch (Exception e){
+                                              } catch (Exception e) {
                                                   Crashlytics.log(e.toString());
                                               }
                                           }
@@ -145,10 +151,26 @@ public class MainActivity extends AppCompatActivity {
         setDateTimeNow(null);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopAll(null);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        //This should fix exception while in background (
+        if (mStartView != null && mStartView.isPopupShowing())
+            mStartView.dismissDropDown();
+        if (mDestView != null && mDestView.isPopupShowing())
+            mDestView.dismissDropDown();
+    }
+
     /**
      * Updates dropdown dialogs with current oldLocations
      */
-
     private void updateDropdown() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, removeDuplicates(mOldLocations));
         mStartView.setAdapter(adapter);
@@ -200,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
             Notification noti = new Notification.Builder(this)
                     .setContentTitle(title)
                     .setContentText(text)
-                    .setTicker("Train should be there")
+                    .setTicker("Train should be there") //TODO: or bus etc
                     .setNumber(1)
                     .setLargeIcon(bitmap)
                     .setSmallIcon(R.drawable.train)
@@ -399,7 +421,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view view called the action
      */
     public void search(View view) {
+        ProgressDialog progress = new ProgressDialog(this);
+        //progress.setTitle("Getting Departures");
+        progress.setMessage("Wait while loading...");
+        progress.show();
         stopAll(view);
+        // To dismiss the dialog
+        // progress.dismiss();
         String start, dest;
         start = mStartView.getText().toString().trim();
         dest = mDestView.getText().toString().trim();
@@ -438,7 +466,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void expandNotificationBar() {
         try {
-
             @SuppressWarnings("ResourceType")  //works
                     Object service = getSystemService("statusbar");
             Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
@@ -507,13 +534,18 @@ public class MainActivity extends AppCompatActivity {
     public void stopAll(View view) {
         ongoingNotification = false;
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancelAll();
         if (mReqLoop == null || !mReqLoop.isAlive()) {
             return;
         }
-        mReqLoop.interrupt();
+        while (mReqLoop.isAlive()) {
+            mReqLoop.interrupt();
+        }
+        long time = System.currentTimeMillis();
+        while (System.currentTimeMillis() - time < 1000) {
+            //wait
+        }
         mNotificationManager.cancelAll();
-        //TODO race condition
+        showToast("Countdown cancelled");
     }
 
     /**

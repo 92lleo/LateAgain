@@ -1,8 +1,6 @@
 package io.kuenzler.android.lateagain.model;
 
-import java.util.Date;
-
-import io.kuenzler.android.lateagain.control.DateCalculator;
+import io.kuenzler.android.lateagain.control.util.DateCalculator;
 
 /**
  * @author Leonhard Künzler

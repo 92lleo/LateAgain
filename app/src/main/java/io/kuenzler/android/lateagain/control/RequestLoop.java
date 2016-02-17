@@ -7,6 +7,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.kuenzler.android.lateagain.MainActivity;
+import io.kuenzler.android.lateagain.control.crawler.Crawler;
+import io.kuenzler.android.lateagain.control.crawler.DBCrawler;
+import io.kuenzler.android.lateagain.control.crawler.GenericCrawler;
+import io.kuenzler.android.lateagain.control.util.DateCalculator;
 import io.kuenzler.android.lateagain.model.Departure;
 
 /**
@@ -37,7 +41,7 @@ public class RequestLoop extends Thread {
      * @param line
      */
     public ArrayList<Departure> getDepartures(String date, String time, String start, String line, String filter) {
-        Crawler2 crawler = new Crawler2(this);
+        Crawler crawler = GenericCrawler.getCrawler(this);
         mDate = date;
         mTime = time;
         mStart = start;
@@ -58,13 +62,14 @@ public class RequestLoop extends Thread {
      * Starts crawler loop and manages countdown
      */
     public void run() {
+        mCurrent = 0;
         mDc = new DateCalculator();
         ArrayList<Departure> departures;
         Departure departure;
-        Crawler2 crawler;
+        DBCrawler crawler;
         int i = 0;
         while (!isInterrupted()) {
-            crawler = new Crawler2(this);
+            crawler = new DBCrawler(this);
             i++;
             Log.i("LateAgain RequestLoop", "#" + i);
             departures = crawler.getDepartures(mDate, mTime, mStart, mLine, mFilter);
@@ -77,15 +82,15 @@ public class RequestLoop extends Thread {
                 return;
             }
             Log.i("LateAgainTime (RL)", "Old: " + mTime + " , new: " + departure.getTimeStart());
-            /*if (!firstRound && !mTime.equals(departure.getTimeStart())) {
-              //TODO time problem goes here
-               int oldIndex = mDepartureIndex;
-               if (mDepartureIndex > 0) {
-                   mDepartureIndex--;
-               }
-               Log.e("LateAgainBugNow", "decreased index from " + oldIndex + " to " + mDepartureIndex);
-               //skip contdown stuff until right one is found
-               continue;
+            /*if (!(mTime == null) && !mTime.isEmpty() && !mTime.equals(departure.getTimeStart())) {
+                //TODO: time problem goes here (fixed)
+                int oldIndex = mDepartureIndex;
+                if (mDepartureIndex > 0) {
+                    mDepartureIndex--;
+                }
+                Log.e("LateAgainBugNow", "decreased index from " + oldIndex + " to " + mDepartureIndex);
+                //skip contdown stuff until right one is found
+                continue;
             }*/
             mCurrent++;
             long distance = mDc.countToDeparture(departure);
@@ -98,7 +103,9 @@ public class RequestLoop extends Thread {
                 interrupt();
             }
         }
-
+        //stop timer by setting mCurrent to invalid value
+        mCurrent = -1;
+        interrupt(); //needed?
     }
 
     /**

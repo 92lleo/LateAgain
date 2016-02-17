@@ -1,9 +1,8 @@
-package io.kuenzler.android.lateagain.control;
+package io.kuenzler.android.lateagain.control.crawler;
 
 import android.util.Log;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -16,28 +15,21 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import io.kuenzler.android.lateagain.control.RequestLoop;
+import io.kuenzler.android.lateagain.control.util.StringSimilarity;
 import io.kuenzler.android.lateagain.model.Departure;
 
 /**
  * @author Leonhard Künzler
- * @version 0.2
- * @date 03.11.15 01:00
+ * @version 0.5
+ * @date 17.02.16
  */
-public class Crawler2 {
+public class DBCrawler extends Crawler {
 
-    private final String mBahnUrl;
-    private final RequestLoop mReqLoop;
-    private Document mBahn;
-    private String date, time, start, dest;
-    private ArrayList<Departure> departures;
+    private final static String DB_URL = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?ld=15061&rt=1&use_realtime_filter=1&webview=&";
 
-    /**
-     * Creates crawler object with corresponding loop given
-     */
-    public Crawler2(RequestLoop reqLoop) {
-        this.mReqLoop = reqLoop;
-        mBahnUrl = "http://mobile.bahn.de/bin/mobil/bhftafel.exe/dox?ld=15061&rt=1&use_realtime_filter=1&webview=&";
-        mBahn = null;
+    public DBCrawler(RequestLoop reqLoop) {
+        super(reqLoop, DB_URL);
     }
 
     /**
@@ -67,7 +59,7 @@ public class Crawler2 {
     /**
      * Testdata for use without gui
      */
-    private void setTestData() {
+    protected void setTestData() {
         Date today = new Date();
         DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT,
                 Locale.GERMANY);
@@ -84,7 +76,7 @@ public class Crawler2 {
      * Cleans results and parses alternative start and dest locations, sets them
      * when possible
      */
-    private boolean cleanAndParseAlternativeLocations() {
+    protected boolean cleanAndParseAlternativeLocations() {
         boolean changed = true;
         while (mBahn == null) {
             //wait for request
@@ -116,7 +108,7 @@ public class Crawler2 {
      * @param alternatives Alternative strings from db site
      * @return best matching string from array
      */
-    private String getBestAlternative(String location, ArrayList<String> alternatives) {
+    protected String getBestAlternative(String location, ArrayList<String> alternatives) {
         double currentDistance, distance = 0;
         String result = "";
         for (String s : alternatives) {
@@ -134,7 +126,7 @@ public class Crawler2 {
      * Cleans the document and parses departures. Expects Query to be sent.
      * 1. blocks until mBahn document is present (change)
      */
-    private void cleanAndParseResults() {
+    protected void cleanAndParseResults() {
         while (mBahn == null) {
             //wait for request
         }
@@ -194,8 +186,8 @@ public class Crawler2 {
             dep.setTimeStart(classBold.get(1).text());
             String ownText = departureTable.ownText();
             String platform, target;
-            if (ownText.contains(",  Gl.")) {
-                target = ownText.substring(2, (ownText.indexOf(",  Gl.") - 1)).trim();
+            if (ownText.contains(",  Gl.")) {
+                target = ownText.substring(2, (ownText.indexOf(",  Gl.") - 1)).trim();
                 platform = ownText.substring(ownText.indexOf("Gl.") + 3).trim();
             } else if (ownText.contains("Gl.")) {
                 target = ownText.substring(2, (ownText.indexOf("Gl.") - 3)).trim();
@@ -217,7 +209,7 @@ public class Crawler2 {
      * prepare and send request to mBahnUrl and save output in mBahn
      */
 
-    private void sendRequest() {
+    protected void sendRequest() {
         Log.i("LateAgainRequest", "Trying input:" + start + ", date:" + date + ", time:" + time);
         new Thread() {
             public void run() {

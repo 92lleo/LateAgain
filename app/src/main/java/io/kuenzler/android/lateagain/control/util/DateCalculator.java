@@ -1,4 +1,4 @@
-package io.kuenzler.android.lateagain.control;
+package io.kuenzler.android.lateagain.control.util;
 
 import android.util.Log;
 
