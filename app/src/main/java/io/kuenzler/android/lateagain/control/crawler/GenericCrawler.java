@@ -10,25 +10,10 @@ import io.kuenzler.android.lateagain.control.RequestLoop;
  */
 public class GenericCrawler {
 
-    private final static int NO_NET = 0;
-    private final static int DB = 1;
-    private final static int MVG = 2;
+
 
     private GenericCrawler() {
     }
-
-    public static Crawler getCrawler(RequestLoop requestLoop) {
-        int currentTransportNet = 0;
-        //currentTransportNet = requestLoop.getCurrentTransportNet();
-        switch (currentTransportNet) {
-            case NO_NET:
-                return new DBCrawler(requestLoop);
-            case DB:
-                return new DBCrawler(requestLoop);
-            case MVG:
-                return new MVGCrawler(requestLoop);
-            default:
-                return new DBCrawler(requestLoop);
-        }
-    }
 }
+
+

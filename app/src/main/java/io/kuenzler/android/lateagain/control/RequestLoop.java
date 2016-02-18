@@ -41,7 +41,7 @@ public class RequestLoop extends Thread {
      * @param line
      */
     public ArrayList<Departure> getDepartures(String date, String time, String start, String line, String filter) {
-        Crawler crawler = GenericCrawler.getCrawler(this);
+        Crawler crawler = Crawler.getCrawler(this);
         mDate = date;
         mTime = time;
         mStart = start;

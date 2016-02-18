@@ -19,6 +19,10 @@ import io.kuenzler.android.lateagain.model.Departure;
  */
 public abstract class Crawler {
 
+    private final static int NO_NET = 0;
+    private final static int DB = 1;
+    private final static int MVG = 2;
+
     //TODO: what is really needed here?
     protected final RequestLoop mReqLoop;
     protected final String mBahnUrl;
@@ -103,5 +107,20 @@ public abstract class Crawler {
         //TODO start = "Eching";
         //dest = "Feldmoching";
         //System.out.println(date + "-" + time + ", " + start + " to " + dest);
+    }
+
+    public static Crawler getCrawler(RequestLoop requestLoop) {
+        int currentTransportNet = 0;
+        //currentTransportNet = requestLoop.getCurrentTransportNet();
+        switch (currentTransportNet) {
+            case NO_NET:
+                return new DBCrawler(requestLoop);
+            case DB:
+                return new DBCrawler(requestLoop);
+            case MVG:
+                return new MVGCrawler(requestLoop);
+            default:
+                return new DBCrawler(requestLoop);
+        }
     }
 }

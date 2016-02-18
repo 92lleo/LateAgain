@@ -82,4 +82,3 @@ public class MVGCrawler extends Crawler {
         }.start();
     }
 }
-}
