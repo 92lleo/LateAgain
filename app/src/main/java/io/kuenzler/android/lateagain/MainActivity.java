@@ -421,10 +421,10 @@ public class MainActivity extends AppCompatActivity {
      * @param view view called the action
      */
     public void search(View view) {
-        ProgressDialog progress = new ProgressDialog(this);
+        //ProgressDialog progress = new ProgressDialog(this);
         //progress.setTitle("Getting Departures");
-        progress.setMessage("Wait while loading...");
-        progress.show();
+        //progress.setMessage("Wait while loading...");
+        //progress.show();
         stopAll(view);
         // To dismiss the dialog
         // progress.dismiss();

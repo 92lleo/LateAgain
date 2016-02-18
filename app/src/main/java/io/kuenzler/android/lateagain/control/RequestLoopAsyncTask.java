@@ -34,7 +34,7 @@ public class RequestLoopAsyncTask extends AsyncTask<String, String, ArrayList<De
     @Override
     protected ArrayList<Departure> doInBackground(String[] params) {
         publishProgress("Submitting request");
-        Crawler crawler = null //Crawler.getCrawler(this);
+        Crawler crawler = null; //Crawler.getCrawler(this);
         mDate = params[0];
         mTime = params[1];
         mStart = params[2];
