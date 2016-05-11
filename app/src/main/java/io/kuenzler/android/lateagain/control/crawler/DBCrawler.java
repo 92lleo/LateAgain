@@ -78,15 +78,15 @@ public class DBCrawler extends Crawler {
      */
     protected boolean cleanAndParseAlternativeLocations() {
         boolean changed = true;
-        while (mBahn == null) {
+        while (mDocument == null) {
             //wait for request
         }
-        if (!mBahn.title().contains("Abfahrt/Ankunft")) {
+        if (!mDocument.title().contains("Abfahrt/Ankunft")) {
             throw new NoSuchElementException(
-                    "Did expect drop down dialog, found site " + mBahn.title());
+                    "Did expect drop down dialog, found site " + mDocument.title());
         }
         // get alternatives for start (select[class=sqproduct)
-        Elements alternatives = mBahn.select("select[class=sqproduct").get(0).children();
+        Elements alternatives = mDocument.select("select[class=sqproduct").get(0).children();
         ArrayList<String> alternativeLocations = new ArrayList<>();
         //TODO System.out.println("--Alternatives to " + start);
         for (Element x : alternatives) {
@@ -124,28 +124,28 @@ public class DBCrawler extends Crawler {
 
     /**
      * Cleans the document and parses departures. Expects Query to be sent.
-     * 1. blocks until mBahn document is present (change)
+     * 1. blocks until mDocument document is present (change)
      */
     protected void cleanAndParseResults() {
-        while (mBahn == null) {
+        while (mDocument == null) {
             //wait for request
         }
-        if (mBahn.text().contains("Ihre Eingabe ist nicht eindeutig")) {
+        if (mDocument.text().contains("Ihre Eingabe ist nicht eindeutig")) {
             if (cleanAndParseAlternativeLocations()) {
                 departures = null;//TODO
                 return;
             }
-            mBahn = null;
+            mDocument = null;
             sendRequest();
         }
-        while (mBahn == null) {
+        while (mDocument == null) {
             //wait for request
         }
-        if (mBahn.text().contains("Keine aktuellen Informationen verfügbar.")) {
+        if (mDocument.text().contains("Keine aktuellen Informationen verfügbar.")) {
             throw new NoSuchElementException(
                     "No departures in near future!");
         }
-        Elements information = mBahn.select("div[class=fline stdpadding").get(0).children();
+        Elements information = mDocument.select("div[class=fline stdpadding").get(0).children();
         String info = information.first().text();
         String newStart;
         try {
@@ -160,7 +160,7 @@ public class DBCrawler extends Crawler {
         mReqLoop.setCorrectedLocations(start, dest);
         Elements departureList;
         try {
-            departureList = mBahn.select("div[class=clicktable").get(0).children();
+            departureList = mDocument.select("div[class=clicktable").get(0).children();
         } catch (IndexOutOfBoundsException e) {
             Log.e("LateAgain", "No departures with that line");
             return;
@@ -201,12 +201,13 @@ public class DBCrawler extends Crawler {
             }
             dep.setPlatform(platform);
             dep.setLocDestination(target);
+            dep.setReady(false);
             departures.add(dep);
         }
     }
 
     /**
-     * prepare and send request to mBahnUrl and save output in mBahn
+     * prepare and send request to mBahnUrl and save output in mDocument
      */
 
     protected void sendRequest() {
@@ -214,7 +215,7 @@ public class DBCrawler extends Crawler {
         new Thread() {
             public void run() {
                 try {
-                    mBahn = Jsoup
+                    mDocument = Jsoup
                             .connect(mBahnUrl)
                             //start location
                             .data("input", start)

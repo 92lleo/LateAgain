@@ -11,13 +11,31 @@ public class Departure {
 
     private String locStart, locDestination, timeStart, timeDestination, type, delay, duration, platform;
     private long timestamp;
+    private boolean ready;
 
     /**
      *
      */
     public Departure() {
-        // TODO something here?
         timestamp = System.currentTimeMillis();
+        ready = false;
+    }
+
+    static boolean verifyDeparture(Departure dep) {
+        boolean result = true;
+        if (dep.getLocStart() == null) {
+            result = false;
+        }
+        if (dep.getLocDestination() == null) {
+            // not needed for now // result = false;
+        }
+        try {
+            Integer.parseInt(dep.getDelay());
+        } catch (NumberFormatException e) {
+            result = false;
+        }
+
+        return result;
     }
 
     /**
@@ -42,11 +60,6 @@ public class Departure {
         locDestination = dest;
     }
 
-    public void setLocStart(String start) {
-        locStart = start;
-
-    }
-
     public void setDest(String dest) {
         locDestination = dest;
     }
@@ -56,6 +69,11 @@ public class Departure {
      */
     public String getLocStart() {
         return locStart;
+    }
+
+    public void setLocStart(String start) {
+        locStart = start;
+
     }
 
     /**
@@ -142,12 +160,24 @@ public class Departure {
         this.duration = duration;
     }
 
-    public void setPlatform(String platform) {
-        this.platform = platform;
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
     public String getPlatform() {
         return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     @Override
@@ -155,22 +185,5 @@ public class Departure {
         return "From " + locStart + ", Platform " + platform + " to " + locDestination + " (" + type
                 + "), at " + timeStart + " with " + delay + " delay. ("
                 + DateCalculator.getDistancems(timestamp) + "ms ago)";
-    }
-
-    static boolean verifyDeparture(Departure dep) {
-        boolean result = true;
-        if (dep.getLocStart() == null) {
-            result = false;
-        }
-        if (dep.getLocDestination() == null) {
-            // not needed for now // result = false;
-        }
-        try {
-            Integer.parseInt(dep.getDelay());
-        } catch (NumberFormatException e) {
-            result = false;
-        }
-
-        return result;
     }
 }

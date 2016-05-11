@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,7 @@ import io.fabric.sdk.android.Fabric;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 import io.kuenzler.android.lateagain.control.util.DateCalculator;
 import io.kuenzler.android.lateagain.control.PropertiesManager;
@@ -184,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
      * @param dep       transportation type (s,bus,u)
      */
     public void createNotification(String time, String departure, Departure dep) {
+
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
@@ -242,11 +245,13 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 time = times[2] + "s";
             }
-            text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart() + " (" + dep.getDelay() + ")";
+            int timeDistanceInt = (int) (System.currentTimeMillis()-dep.getTimestamp())/1000;
+            String timeDistance = " (-"+timeDistanceInt+"s utd";
+            text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart() + " (" + dep.getDelay() + ")"+" (-"+timeDistanceInt+"s utd";
             if (dep.getPlatform().equals("-")) {
                 title = time + " left to get to " + dep.getType();
             } else {
-                title = time + " left to get to platform " + dep.getPlatform();
+                title = time + " left to get to platform ";
             }
             Notification noti = new Notification.Builder(this)
                     .setContentTitle(title)

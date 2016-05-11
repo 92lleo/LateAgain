@@ -26,7 +26,7 @@ public abstract class Crawler {
     //TODO: what is really needed here?
     protected final RequestLoop mReqLoop;
     protected final String mBahnUrl;
-    protected Document mBahn;
+    protected Document mDocument;
     protected String date, time, start, dest;
     protected ArrayList<Departure> departures;
 
@@ -37,7 +37,7 @@ public abstract class Crawler {
     public Crawler(RequestLoop reqLoop, String url) {
         this.mReqLoop = reqLoop;
         mBahnUrl = url;
-        mBahn = null;
+        mDocument = null;
     }
 
     /**
@@ -65,7 +65,7 @@ public abstract class Crawler {
     protected abstract void cleanAndParseResults(); //shoud be private
 
     /**
-     * prepare and send request to mBahnUrl and save output in mBahn
+     * prepare and send request to mBahnUrl and save output in mDocument
      */
     protected abstract void sendRequest(); //shoud be private
 
