@@ -226,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
                     .setContentTitle(title)
                     .setContentText(text)
                     .setTicker("Train should be there") //TODO: or bus etc
-                    .setNumber(1)
                     .setLargeIcon(bitmap)
                     .setSmallIcon(R.drawable.train)
                     .setContentIntent(pIntent)
@@ -257,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
                     .setContentTitle(title)
                     .setContentText(text)
                     .setTicker(text)
-                    .setNumber(1)
                     .setLargeIcon(bitmap)
                     //.setSmallIcon(R.drawable.clock)
                     .setSmallIcon(R.drawable.train)
