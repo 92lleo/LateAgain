@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView mStartView;
     private AutoCompleteTextView mDestView;
     private TextView mDateView;
+    private CheckBox mOngoingNotification;
     //private final TextView mTimeView = (TextView) findViewById(R.id.l_time);
     //private final Button mNowButton = (Button) findViewById(R.id.b_now);
 
@@ -70,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
     private String[] mOldLocations;
 
     private int mOldDelay;
-    private boolean ongoingNotification = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         mStartView = (AutoCompleteTextView) findViewById(R.id.t_start);
         mDestView = (AutoCompleteTextView) findViewById(R.id.t_line);
         mDateView = (TextView) findViewById(R.id.t_date);
+        mOngoingNotification = (CheckBox) findViewById(R.id.cb_ongoing);
 
         /*setDateTimeNow(null);
         mPm = new PropertiesManager(this);
@@ -187,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void createNotification(String time, String departure, Departure dep) {
 
+        boolean useOngoing = mOngoingNotification.isChecked();
+
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
@@ -263,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                     //.addAction(0, "<< Prev", pIntent)
                     //.addAction(0, "Stop", pIntent)
                     //.addAction(0, "Next >>", pIntent)
-                    .setOngoing(ongoingNotification)
+                    .setOngoing(useOngoing)
                     .build();
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             noti.flags |= Notification.FLAG_AUTO_CANCEL;
