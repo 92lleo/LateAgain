@@ -9,7 +9,6 @@ import java.util.TimerTask;
 import io.kuenzler.android.lateagain.MainActivity;
 import io.kuenzler.android.lateagain.control.crawler.Crawler;
 import io.kuenzler.android.lateagain.control.crawler.DBCrawler;
-import io.kuenzler.android.lateagain.control.crawler.GenericCrawler;
 import io.kuenzler.android.lateagain.control.util.DateCalculator;
 import io.kuenzler.android.lateagain.model.Departure;
 

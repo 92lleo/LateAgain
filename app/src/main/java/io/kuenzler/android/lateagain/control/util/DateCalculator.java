@@ -1,14 +1,12 @@
 package io.kuenzler.android.lateagain.control.util;
 
-import android.util.Log;
-
-import io.kuenzler.android.lateagain.model.Departure;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import io.kuenzler.android.lateagain.model.Departure;
 
 /**
  * @author Leonhard Künzler
@@ -24,6 +22,26 @@ public class DateCalculator {
      */
     public DateCalculator() {
         //TODO needed?
+    }
+
+    /**
+     * @return
+     */
+    public static String getCurrentDate() {
+        Date today = new Date();
+        DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
+        return formatter.format(today);
+    }
+
+    public static String getCurrentTime() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm");//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
+
+    public static long getDistancems(long timestamp) {
+        return System.currentTimeMillis() - timestamp;
     }
 
     /**
@@ -132,25 +150,5 @@ public class DateCalculator {
         long departureTime = cal.getTimeInMillis() + (delay * 60000);
         Date date = new Date(departureTime);
         return getDateDifferenceFromNow(date);
-    }
-
-    /**
-     * @return
-     */
-    public static String getCurrentDate() {
-        Date today = new Date();
-        DateFormat formatter = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMANY);
-        return formatter.format(today);
-    }
-
-    public static String getCurrentTime() {
-        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm");//dd/MM/yyyy
-        Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate;
-    }
-
-    public static long getDistancems(long timestamp) {
-        return System.currentTimeMillis() - timestamp;
     }
 }

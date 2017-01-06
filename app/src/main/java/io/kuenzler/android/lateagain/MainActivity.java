@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.speech.tts.TextToSpeech;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -34,16 +32,14 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 import com.crashlytics.android.answers.SearchEvent;
 
-import io.fabric.sdk.android.Fabric;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Locale;
 
-import io.kuenzler.android.lateagain.control.util.DateCalculator;
+import io.fabric.sdk.android.Fabric;
 import io.kuenzler.android.lateagain.control.PropertiesManager;
 import io.kuenzler.android.lateagain.control.RequestLoop;
+import io.kuenzler.android.lateagain.control.util.DateCalculator;
 import io.kuenzler.android.lateagain.model.Departure;
 import io.kuenzler.android.lateagain.view.DeparturesDLV;
 import io.kuenzler.android.lateagain.view.LocationsDLV;
@@ -51,11 +47,11 @@ import io.kuenzler.android.lateagain.view.LocationsDLV;
 /**
  * @author Leonhard Künzler
  * @version 0.7
- *
- * //TODO: search in extra thread
- * //TODO: loop in extra thread
- * //TODO: use time and date
- * //TODO: use filter
+ *          <p>
+ *          //TODO: search in extra thread
+ *          //TODO: loop in extra thread
+ *          //TODO: use time and date
+ *          //TODO: use filter
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -247,9 +243,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 time = times[2] + "s";
             }
-            int timeDistanceInt = (int) (System.currentTimeMillis()-dep.getTimestamp())/1000;
-            String timeDistance = " (-"+timeDistanceInt+"s utd";
-            text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart() + " (" + dep.getDelay() + ")"+" (-"+timeDistanceInt+"s utd";
+            int timeDistanceInt = (int) (System.currentTimeMillis() - dep.getTimestamp()) / 1000;
+            String timeDistance = " (-" + timeDistanceInt + "s utd";
+            text = dep.getType() + " to " + dep.getLocDestination() + " at " + dep.getTimeStart() + " (" + dep.getDelay() + ")" + " (-" + timeDistanceInt + "s utd";
             if (dep.getPlatform().equals("-")) {
                 title = time + " left to get to " + dep.getType();
             } else {
@@ -514,8 +510,6 @@ public class MainActivity extends AppCompatActivity {
      * @param index index of desired departure
      */
     public void startCountdown(int index) {
-        CheckBox cb = (CheckBox) findViewById(R.id.cb_ongoing);
-        ongoingNotification = cb.isSelected();
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.snackbarCoordinatorLayout);
         final Snackbar snackbar = Snackbar
                 .make(coordinatorLayout, "Startet new countdown...", Snackbar.LENGTH_LONG);
@@ -538,7 +532,6 @@ public class MainActivity extends AppCompatActivity {
      * @param view view that called the action
      */
     public void stopAll(View view) {
-        ongoingNotification = false;
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (mReqLoop == null || !mReqLoop.isAlive()) {
             return;

@@ -40,6 +40,21 @@ public abstract class Crawler {
         mDocument = null;
     }
 
+    public static Crawler getCrawler(RequestLoop requestLoop) {
+        int currentTransportNet = 0;
+        //currentTransportNet = requestLoop.getCurrentTransportNet();
+        switch (currentTransportNet) {
+            case NO_NET:
+                return new DBCrawler(requestLoop);
+            case DB:
+                return new DBCrawler(requestLoop);
+            case MVG:
+                return new MVGCrawler(requestLoop);
+            default:
+                return new DBCrawler(requestLoop);
+        }
+    }
+
     /**
      * Returns a list of departures for given data
      *
@@ -107,20 +122,5 @@ public abstract class Crawler {
         //TODO start = "Eching";
         //dest = "Feldmoching";
         //System.out.println(date + "-" + time + ", " + start + " to " + dest);
-    }
-
-    public static Crawler getCrawler(RequestLoop requestLoop) {
-        int currentTransportNet = 0;
-        //currentTransportNet = requestLoop.getCurrentTransportNet();
-        switch (currentTransportNet) {
-            case NO_NET:
-                return new DBCrawler(requestLoop);
-            case DB:
-                return new DBCrawler(requestLoop);
-            case MVG:
-                return new MVGCrawler(requestLoop);
-            default:
-                return new DBCrawler(requestLoop);
-        }
     }
 }
