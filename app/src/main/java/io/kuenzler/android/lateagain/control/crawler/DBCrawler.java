@@ -127,8 +127,9 @@ public class DBCrawler extends Crawler {
      * 1. blocks until mDocument document is present (change)
      */
     protected void cleanAndParseResults() {
-        while (mDocument == null) {
-            //wait for request
+        if(mDocument == null){
+            throw new NoSuchElementException(
+                    "No departures in near future!");
         }
         if (mDocument.text().contains("Ihre Eingabe ist nicht eindeutig")) {
             if (cleanAndParseAlternativeLocations()) {
@@ -138,10 +139,7 @@ public class DBCrawler extends Crawler {
             mDocument = null;
             sendRequest();
         }
-        while (mDocument == null) {
-            //wait for request
-        }
-        if (mDocument.text().contains("Keine aktuellen Informationen verfügbar.")) {
+        if (mDocument == null || mDocument.text().contains("Keine aktuellen Informationen verfügbar.")) {
             throw new NoSuchElementException(
                     "No departures in near future!");
         }
@@ -212,7 +210,8 @@ public class DBCrawler extends Crawler {
 
     protected void sendRequest() {
         Log.i("LateAgainRequest", "Trying input:" + start + ", date:" + date + ", time:" + time);
-        new Thread() {
+        //TODO: Thread is just there to bypass androids main thread network activity watch
+        Thread t = new Thread() {
             public void run() {
                 try {
                     mDocument = Jsoup
@@ -238,6 +237,12 @@ public class DBCrawler extends Crawler {
                     Log.e("LateAgain", "Request failed: Nullvalue in post");
                 }
             }
-        }.start();
+        };
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
